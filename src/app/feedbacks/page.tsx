@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { NotificationBanner } from "@/components/NotificationBanner";
 import { listFeedbacks } from "@/lib/airtable";
 import { getCurrentUser } from "@/lib/auth";
 import { FeedbacksList } from "./FeedbacksList";
@@ -13,6 +14,7 @@ export default async function FeedbacksPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <NotificationBanner />
       <FeedbacksList feedbacks={feedbacks} currentUserId={user.id} />
     </div>
   );

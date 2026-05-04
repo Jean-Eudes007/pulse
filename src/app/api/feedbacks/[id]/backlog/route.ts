@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import {
+  deleteNotificationForFeedback,
   getFeedbackById,
   removeFromBacklog,
   sendToBacklog,
+  upsertNotification,
 } from "@/lib/airtable";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -29,6 +31,16 @@ export async function POST(_request: Request, context: RouteContext) {
   }
 
   await sendToBacklog(id);
+
+  // Notify the creator (skip if creator IS the admin doing the action)
+  if (feedback.creatorId && feedback.creatorId !== user.id) {
+    await upsertNotification({
+      recipientId: feedback.creatorId,
+      feedbackId: id,
+      status: "to_do",
+    });
+  }
+
   return NextResponse.json({ ok: true, status: "to_do" });
 }
 
@@ -51,5 +63,11 @@ export async function DELETE(_request: Request, context: RouteContext) {
   }
 
   await removeFromBacklog(id);
+
+  // Drop any existing notification for the creator
+  if (feedback.creatorId) {
+    await deleteNotificationForFeedback(feedback.creatorId, id);
+  }
+
   return NextResponse.json({ ok: true });
 }

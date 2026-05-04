@@ -31,6 +31,12 @@
   --color-type-amelioration-bg: #e1f5ee;
   --color-type-amelioration-text: #0f6e56;
 
+  /* Highlight (used on creator's own feedback when status changed) */
+  --color-highlight-bg: #fef9c3;
+  --color-highlight-border: #fcd34d;
+  --color-highlight-text: #713f12;
+  --color-highlight-stripe: #fde68a;
+
   /* Radii */
   --radius-md: 6px;
   --radius-lg: 12px;
@@ -61,6 +67,11 @@
   --color-type-idee-text: #b6abff;
   --color-type-amelioration-bg: #1c3a2c;
   --color-type-amelioration-text: #5fdba1;
+
+  --color-highlight-bg: #2d2410;
+  --color-highlight-border: #a16207;
+  --color-highlight-text: #fde68a;
+  --color-highlight-stripe: #422f08;
 }
 
 html,

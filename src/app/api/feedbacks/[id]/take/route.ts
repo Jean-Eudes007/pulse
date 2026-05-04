@@ -3,6 +3,7 @@ import {
   assignFeedback,
   getFeedbackById,
   setFeedbackStatus,
+  upsertNotification,
 } from "@/lib/airtable";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -43,6 +44,15 @@ export async function POST(_request: Request, context: RouteContext) {
 
   await assignFeedback(id, user.id);
   await setFeedbackStatus(id, "in_progress");
+
+  // Notify the creator (the dev taking it isn't the creator usually)
+  if (feedback.creatorId && feedback.creatorId !== user.id) {
+    await upsertNotification({
+      recipientId: feedback.creatorId,
+      feedbackId: id,
+      status: "in_progress",
+    });
+  }
 
   return NextResponse.json({
     ok: true,

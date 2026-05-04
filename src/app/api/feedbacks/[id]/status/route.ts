@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getFeedbackById, setFeedbackStatus } from "@/lib/airtable";
+import {
+  getFeedbackById,
+  setFeedbackStatus,
+  upsertNotification,
+} from "@/lib/airtable";
 import { getCurrentUser } from "@/lib/auth";
 import { STATUS_TRANSITIONS, statusUpdateSchema } from "@/lib/schemas";
 
@@ -62,5 +66,15 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   await setFeedbackStatus(id, next);
+
+  // Notify the creator (unless they're the one moving the ticket)
+  if (feedback.creatorId && feedback.creatorId !== user.id) {
+    await upsertNotification({
+      recipientId: feedback.creatorId,
+      feedbackId: id,
+      status: next,
+    });
+  }
+
   return NextResponse.json({ ok: true, status: next });
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { MarkSeenOnMount } from "@/components/MarkSeenOnMount";
 import { StatusBadge } from "@/components/StatusBadge";
 import { TypeBadge } from "@/components/TypeBadge";
 import { findVote, getFeedbackById } from "@/lib/airtable";
@@ -32,6 +33,7 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
 
   return (
     <div className="max-w-3xl mx-auto">
+      {isCreator && <MarkSeenOnMount feedbackId={feedback.id} />}
       <Link
         href="/feedbacks"
         className="text-sm text-text-secondary hover:text-text-primary inline-block mb-4"
