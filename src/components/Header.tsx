@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { LogoutButton } from "./LogoutButton";
+import { ThemeToggle } from "./ThemeToggle";
 
 export async function Header() {
   const user = await getCurrentUser();
@@ -55,6 +56,7 @@ export async function Header() {
                 {user.email}
               </span>
               <LogoutButton />
+              <ThemeToggle />
             </div>
           ) : (
             <div className="flex items-center gap-2 sm:ml-2">
@@ -70,6 +72,7 @@ export async function Header() {
               >
                 Inscription
               </Link>
+              <ThemeToggle />
             </div>
           )}
         </nav>

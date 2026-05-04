@@ -36,6 +36,33 @@
   --radius-lg: 12px;
 }
 
+/* Dark theme overrides — applied via [data-theme="dark"] on <html>.
+   Tokens are CSS custom props (Tailwind v4 @theme inline), so swapping
+   the var values cascade to every utility class consuming them. */
+[data-theme="dark"] {
+  --color-bg-primary: #1a1a1a;
+  --color-bg-secondary: #232323;
+  --color-bg-tertiary: #0d0d0d;
+
+  --color-text-primary: #f5f5f3;
+  --color-text-secondary: #a3a3a3;
+  --color-text-tertiary: #707070;
+  --color-text-info: #1a1a1a;
+
+  --color-border-secondary: #3a3a3a;
+  --color-border-tertiary: #2a2a2a;
+
+  --color-action: #f5f5f3;
+  --color-action-hover: #d8d8d5;
+
+  --color-type-bug-bg: #3a1f1f;
+  --color-type-bug-text: #ff9b9b;
+  --color-type-idee-bg: #2a2840;
+  --color-type-idee-text: #b6abff;
+  --color-type-amelioration-bg: #1c3a2c;
+  --color-type-amelioration-text: #5fdba1;
+}
+
 html,
 body {
   background: var(--color-bg-tertiary);
