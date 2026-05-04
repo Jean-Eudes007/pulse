@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export function LoginForm() {
-  const router = useRouter();
   const search = useSearchParams();
   const redirectTo = search.get("redirect") ?? "/feedbacks";
 
@@ -35,8 +34,8 @@ export function LoginForm() {
     }
 
     toast.success("Connexion réussie");
-    router.refresh();
-    router.push(redirectTo);
+    // Full reload to refresh Server Components (Header) reading the new cookie
+    window.location.href = redirectTo;
   }
 
   return (

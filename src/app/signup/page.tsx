@@ -1,12 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function SignupPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -33,8 +31,7 @@ export default function SignupPage() {
     }
 
     toast.success("Bienvenue sur Pulse !");
-    router.refresh();
-    router.push("/feedbacks");
+    window.location.href = "/feedbacks";
   }
 
   return (
