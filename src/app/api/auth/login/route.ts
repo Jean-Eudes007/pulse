@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getUserByEmail } from "@/lib/airtable";
 import { setAuthCookie, verifyPassword } from "@/lib/auth";
@@ -34,6 +35,7 @@ export async function POST(request: Request) {
   }
 
   await setAuthCookie({ id: user.id, email: user.email, role: user.role });
+  revalidatePath("/", "layout");
 
   return NextResponse.json({
     user: { id: user.id, email: user.email, name: user.name, role: user.role },

@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createUser, getUserByEmail } from "@/lib/airtable";
@@ -33,6 +34,7 @@ export async function POST(request: Request) {
   const user = await createUser({ email, passwordHash, name });
 
   await setAuthCookie({ id: user.id, email: user.email, role: user.role });
+  revalidatePath("/", "layout");
 
   return NextResponse.json({
     user: { id: user.id, email: user.email, name: user.name, role: user.role },
