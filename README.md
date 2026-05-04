@@ -50,10 +50,14 @@ Dans Airtable, modifier la table par défaut "Table 1" et en créer 2 autres :
 #### Table `Votes`
 | Champ | Type | Notes |
 |---|---|---|
-| `Id` | Auto number | **Primary** |
+| `Reference` | Single line text | **Primary** (laissé vide) |
 | `Feedback` | Link to another record → Feedbacks | single record |
 | `User` | Link to another record → Users | single record |
+| `FeedbackId` | Single line text | dupliqué pour permettre le filtre `findVote` |
+| `UserId` | Single line text | idem |
 | `CreatedAt` | Created time | auto |
+
+⚠️ Les champs `FeedbackId` et `UserId` sont des duplicatas texte des liens `Feedback`/`User`. Ils permettent à l'API `findVote` de filtrer via `filterByFormula` car Airtable ne sait pas filtrer un linked record par son ID (seul le primary field est exposé via `ARRAYJOIN`).
 
 ### 4. Configurer les variables d'env
 
