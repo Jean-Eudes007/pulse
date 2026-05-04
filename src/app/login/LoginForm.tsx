@@ -7,7 +7,12 @@ import { toast } from "sonner";
 
 export function LoginForm() {
   const search = useSearchParams();
-  const redirectTo = search.get("redirect") ?? "/feedbacks";
+  const rawRedirect = search.get("redirect");
+  // Open-redirect guard: only accept internal relative paths (start with single "/")
+  const redirectTo =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/feedbacks";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

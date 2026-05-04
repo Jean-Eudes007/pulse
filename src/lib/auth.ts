@@ -40,7 +40,9 @@ export function signToken(user: AuthUser): string {
 
 export function verifyToken(token: string): AuthUser | null {
   try {
-    const payload = jwt.verify(token, getJwtSecret()) as {
+    const payload = jwt.verify(token, getJwtSecret(), {
+      algorithms: ["HS256"],
+    }) as {
       sub: string;
       email: string;
       role: Role;
