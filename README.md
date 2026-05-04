@@ -1,36 +1,123 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pulse
 
-## Getting Started
+Outil de centralisation et priorisation du feedback produit. Projet de formation La Capsule.
 
-First, run the development server:
+**Stack** : Next.js 15 (App Router) · TypeScript · Tailwind v4 · Airtable · Auth JWT custom
+
+---
+
+## Setup local
+
+### 1. Installer les dépendances
+
+```bash
+npm install
+```
+
+### 2. Créer la base Airtable
+
+1. Aller sur [airtable.com](https://airtable.com), créer un compte gratuit
+2. **Add a base** → from scratch → la nommer `Pulse`
+3. Récupérer le `Base ID` dans l'URL : `airtable.com/appXXXXXXXXXXXXXX/...` → la partie `appXXXXXXXXXXXXXX`
+4. Créer un Personal Access Token : [airtable.com/create/tokens](https://airtable.com/create/tokens)
+   - Name: `Pulse local`
+   - Scopes: `data.records:read`, `data.records:write`, `schema.bases:read`
+   - Access: cocher uniquement la base Pulse
+
+### 3. Créer les tables (dans la base Pulse)
+
+Dans Airtable, modifier la table par défaut "Table 1" et en créer 2 autres :
+
+#### Table `Users`
+| Champ | Type | Notes |
+|---|---|---|
+| `Email` | Single line text | **Primary** |
+| `PasswordHash` | Long text | |
+| `Name` | Single line text | |
+| `Role` | Single select | options : `user`, `admin` |
+| `CreatedAt` | Created time | auto |
+
+#### Table `Feedbacks`
+| Champ | Type | Notes |
+|---|---|---|
+| `Title` | Single line text | **Primary** |
+| `Description` | Long text | |
+| `Type` | Single select | options : `bug`, `idée`, `amélioration` |
+| `VoteCount` | Number (integer, precision 0) | default `0` |
+| `Creator` | Link to another record → Users | single record link |
+| `CreatedAt` | Created time | auto |
+
+#### Table `Votes`
+| Champ | Type | Notes |
+|---|---|---|
+| `Id` | Auto number | **Primary** |
+| `Feedback` | Link to another record → Feedbacks | single record |
+| `User` | Link to another record → Users | single record |
+| `CreatedAt` | Created time | auto |
+
+### 4. Configurer les variables d'env
+
+```bash
+cp .env.example .env.local
+# Éditer .env.local et remplir AIRTABLE_TOKEN + AIRTABLE_BASE_ID
+```
+
+Le `JWT_SECRET` est déjà généré dans `.env.local`. Pour en regénérer un : `openssl rand -base64 48`.
+
+### 5. Lancer
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+→ [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 6. Créer un admin
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Après s'être inscrit via `/signup`, ouvrir Airtable, table `Users`, modifier le champ `Role` du user à `admin`.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Déploiement Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. `git push` sur GitHub
+2. [vercel.com](https://vercel.com) → Import Git Repository → choisir `pulse`
+3. Environment Variables : ajouter `AIRTABLE_TOKEN`, `AIRTABLE_BASE_ID`, `JWT_SECRET` (Production + Preview)
+4. Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+⚠️ Recommandé : créer 2 bases Airtable distinctes (`Pulse-Dev` pour `.env.local`, `Pulse-Prod` pour Vercel) pour ne pas polluer la prod avec de la data de test.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Architecture
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/
+│   ├── (auth)/login/page.tsx
+│   ├── (auth)/signup/page.tsx
+│   ├── feedbacks/page.tsx
+│   ├── feedback/[id]/page.tsx
+│   ├── submit/page.tsx
+│   ├── admin/page.tsx
+│   ├── api/
+│   │   ├── auth/{signup,login,logout}/route.ts
+│   │   ├── me/route.ts
+│   │   └── feedbacks/[id]/{vote,}/route.ts
+│   └── layout.tsx
+├── components/
+│   ├── Header.tsx
+│   ├── TypeBadge.tsx
+│   └── FeedbackCard.tsx
+├── lib/
+│   ├── airtable.ts   ← seul endroit qui parle à Airtable
+│   ├── auth.ts        ← bcrypt + JWT helpers
+│   └── schemas.ts     ← validation Zod
+└── middleware.ts      ← protection des routes
+```
+
+**Sécurité :**
+- Le token Airtable ne quitte jamais le serveur (API routes Next.js)
+- Auth via JWT signé dans cookie `httpOnly`, `secure`, `sameSite=lax`
+- Toutes les mutations vérifient `getCurrentUser()` + ownership
+- L'UI cache les boutons selon le rôle, mais c'est l'API qui refuse pour de vrai (403)
