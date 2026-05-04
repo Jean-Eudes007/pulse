@@ -131,7 +131,7 @@ Pas de plugin, pas d'IA, pas d'intégration Slack. Juste l'essentiel pour arrêt
            │ airtable.js SDK
            ▼
 ┌──────────────────────────────┐
-│  Airtable base "Pulse"       │
+│  Airtable base "Pulse Base"  │
 │  Users · Feedbacks · Votes   │
 └──────────────────────────────┘
 ```
@@ -197,12 +197,12 @@ npm install
 ```
 
 ### 2. Créer la base Airtable
-1. [airtable.com](https://airtable.com) → **Create a base** → la nommer `Pulse`
+1. [airtable.com](https://airtable.com) → **Create a base** → la nommer `Pulse Base`
 2. Récupérer le `Base ID` dans l'URL (`airtable.com/appXXXXXXXXXXXXXX/...`)
 3. [airtable.com/create/tokens](https://airtable.com/create/tokens) → créer un PAT
    - Name : `Pulse local`
    - Scopes : `data.records:read`, `data.records:write`, `schema.bases:read`
-   - Access : restreindre à la base `Pulse` (best practice sécu)
+   - Access : restreindre à la base `Pulse Base` (best practice sécu)
 
 ### 3. Créer les tables
 Voir [Schéma Airtable](#schéma-airtable) ci-dessous.
