@@ -83,14 +83,14 @@ export default function SignupPage() {
             id="password"
             type="password"
             required
-            minLength={8}
+            minLength={10}
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-md border border-border-tertiary bg-bg-secondary px-3 py-2 text-sm text-text-primary"
           />
           <p className="text-xs text-text-tertiary mt-1">
-            Minimum 8 caractères
+            Minimum 10 caractères
           </p>
         </div>
 

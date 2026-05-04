@@ -3,9 +3,12 @@ import { z } from "zod";
 export const FEEDBACK_TYPES = ["bug", "idée", "amélioration"] as const;
 export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 
+// N-1: NIST 800-63B aligns on length over complexity rules.
+// 10 chars min keeps demo passwords like "password123" (11 chars) valid
+// while raising entropy floor.
 export const signupSchema = z.object({
   email: z.string().email("Email invalide"),
-  password: z.string().min(8, "Mot de passe min. 8 caractères"),
+  password: z.string().min(10, "Mot de passe min. 10 caractères"),
   name: z.string().min(1, "Nom requis").max(80),
 });
 

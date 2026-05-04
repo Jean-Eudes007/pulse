@@ -24,9 +24,13 @@ export async function POST(request: Request) {
   const { email, password, name } = parsed.data;
   const existing = await getUserByEmail(email);
   if (existing) {
+    // I-1: neutral message + 400 to avoid email enumeration via signup
     return NextResponse.json(
-      { error: "Cet email est déjà utilisé" },
-      { status: 409 },
+      {
+        error:
+          "Impossible de créer le compte. Si vous avez déjà un compte, essayez de vous connecter.",
+      },
+      { status: 400 },
     );
   }
 
