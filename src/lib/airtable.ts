@@ -239,34 +239,41 @@ export async function listBacklogFeedbacks(): Promise<FeedbackWithCreator[]> {
   return enrichWithUsers(feedbacks);
 }
 
+// Airtable accepts null to clear a field but the SDK FieldSet type
+// doesn't include null. Cast via `as unknown as Partial<FieldSet>` is
+// the standard escape hatch used elsewhere in this file.
 export async function setFeedbackStatus(
   id: string,
   status: FeedbackStatus | null,
 ): Promise<void> {
-  await feedbacksTable.update([
-    { id, fields: { Status: status ?? null } },
-  ]);
+  const fields = { Status: status } as unknown as Partial<FieldSet>;
+  await feedbacksTable.update([{ id, fields }]);
 }
 
 export async function assignFeedback(
   id: string,
   userId: string | null,
 ): Promise<void> {
-  await feedbacksTable.update([
-    { id, fields: { AssignedTo: userId ? [userId] : [] } },
-  ]);
+  const fields = {
+    AssignedTo: userId ? [userId] : [],
+  } as unknown as Partial<FieldSet>;
+  await feedbacksTable.update([{ id, fields }]);
 }
 
 export async function sendToBacklog(id: string): Promise<void> {
-  await feedbacksTable.update([
-    { id, fields: { Status: "to_do", AssignedTo: [] } },
-  ]);
+  const fields = {
+    Status: "to_do",
+    AssignedTo: [],
+  } as unknown as Partial<FieldSet>;
+  await feedbacksTable.update([{ id, fields }]);
 }
 
 export async function removeFromBacklog(id: string): Promise<void> {
-  await feedbacksTable.update([
-    { id, fields: { Status: null, AssignedTo: [] } },
-  ]);
+  const fields = {
+    Status: null,
+    AssignedTo: [],
+  } as unknown as Partial<FieldSet>;
+  await feedbacksTable.update([{ id, fields }]);
 }
 
 /* -------------------------------------------------------------- Votes -- */
