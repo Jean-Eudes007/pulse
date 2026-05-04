@@ -48,7 +48,7 @@ export default function SubmitPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto bg-bg-primary border border-border-tertiary rounded-lg p-8">
+    <div className="max-w-xl mx-auto bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8">
       <h1 className="text-base font-medium mb-6">
         Page 1 — Créer un feedback
       </h1>

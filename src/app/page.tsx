@@ -60,7 +60,7 @@ export default async function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className="bg-bg-primary border border-border-tertiary rounded-lg p-8 mb-12">
+      <section className="bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8 mb-12">
         <h2 className="text-base font-medium mb-6">Comment ça marche</h2>
         <ol className="space-y-4 text-sm text-text-secondary">
           <Step n={1}>

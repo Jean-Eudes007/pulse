@@ -7,15 +7,15 @@ export async function Header() {
 
   return (
     <header className="border-b border-border-tertiary bg-bg-primary">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2">
         <Link
-          href="/feedbacks"
-          className="text-base font-semibold text-text-primary"
+          href={user ? "/feedbacks" : "/"}
+          className="text-base font-semibold text-text-primary shrink-0"
         >
           Pulse
         </Link>
 
-        <nav className="flex items-center gap-4 text-sm">
+        <nav className="flex items-center gap-2 sm:gap-4 text-sm">
           {user && (
             <Link
               href="/feedbacks"
@@ -42,23 +42,23 @@ export async function Header() {
           )}
 
           {user ? (
-            <div className="flex items-center gap-3 ml-2">
-              <span className="text-text-tertiary text-xs hidden sm:inline">
+            <div className="flex items-center gap-2 sm:gap-3 sm:ml-2">
+              <span className="text-text-tertiary text-xs hidden md:inline">
                 {user.email}
               </span>
               <LogoutButton />
             </div>
           ) : (
-            <div className="flex items-center gap-2 ml-2">
+            <div className="flex items-center gap-2 sm:ml-2">
               <Link
                 href="/login"
-                className="rounded-md px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-bg-secondary transition-colors"
+                className="rounded-md px-2 sm:px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-bg-secondary transition-colors"
               >
                 Connexion
               </Link>
               <Link
                 href="/signup"
-                className="rounded-md bg-action px-3 py-1.5 text-sm font-medium text-text-info hover:bg-action-hover transition-colors"
+                className="rounded-md bg-action px-2 sm:px-3 py-1.5 text-sm font-medium text-text-info hover:bg-action-hover transition-colors"
               >
                 Inscription
               </Link>

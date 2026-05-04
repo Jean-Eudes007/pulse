@@ -35,7 +35,7 @@ export function FeedbacksList({
     filter === "all" ? feedbacks : feedbacks.filter((f) => f.type === filter);
 
   return (
-    <div className="bg-bg-primary border border-border-tertiary rounded-lg p-8">
+    <div className="bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8">
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
         <h1 className="text-base font-medium">Liste des feedbacks</h1>
         <Link

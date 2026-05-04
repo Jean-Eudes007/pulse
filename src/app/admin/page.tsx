@@ -16,13 +16,11 @@ export default async function AdminPage() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="bg-bg-primary border border-border-tertiary rounded-lg p-8">
-        <h1 className="text-base font-medium mb-6">
-          Page 4 — Dashboard Admin
-        </h1>
+      <div className="bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8">
+        <h1 className="text-base font-medium mb-6">Dashboard Admin</h1>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto -mx-5 sm:mx-0 px-5 sm:px-0">
+          <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="border-b border-border-tertiary">
                 <th className="text-left py-3 text-[11px] uppercase font-medium text-text-secondary">

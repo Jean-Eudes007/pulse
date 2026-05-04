@@ -38,7 +38,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto bg-bg-primary border border-border-tertiary rounded-lg p-8">
+    <div className="max-w-md mx-auto bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8">
       <h1 className="text-xl font-medium mb-6">Inscription</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

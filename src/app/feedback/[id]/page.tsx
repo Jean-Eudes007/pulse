@@ -38,12 +38,12 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
         ← Retour à la liste
       </Link>
 
-      <div className="bg-bg-primary border border-border-tertiary rounded-lg p-8">
+      <div className="bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8">
         <h1 className="text-lg font-medium text-text-primary mb-4">
           {feedback.title}
         </h1>
 
-        <div className="flex flex-wrap gap-6 mb-6 text-sm">
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-x-4 gap-y-3 sm:gap-6 mb-6 text-sm">
           <div>
             <div className="text-[11px] uppercase text-text-tertiary mb-1">
               Type
