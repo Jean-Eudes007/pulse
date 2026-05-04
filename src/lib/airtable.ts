@@ -1,5 +1,6 @@
 import Airtable, { type FieldSet, type Records } from "airtable";
-import type { FeedbackType } from "./schemas";
+import type { Role } from "./auth";
+import type { FeedbackStatus, FeedbackType } from "./schemas";
 
 function getEnv(name: string): string {
   const v = process.env[name];
@@ -27,7 +28,7 @@ export type UserRecord = {
   email: string;
   passwordHash: string;
   name: string;
-  role: "user" | "admin";
+  role: Role;
 };
 
 function mapUser(r: AirtableRecord): UserRecord {
@@ -37,7 +38,7 @@ function mapUser(r: AirtableRecord): UserRecord {
     email: String(f.Email ?? ""),
     passwordHash: String(f.PasswordHash ?? ""),
     name: String(f.Name ?? ""),
-    role: (f.Role as "user" | "admin") ?? "user",
+    role: (f.Role as Role) ?? "user",
   };
 }
 
@@ -94,6 +95,13 @@ export async function createUser(input: {
   return mapUser(created[0]);
 }
 
+export async function listDevs(): Promise<UserRecord[]> {
+  const records = await usersTable
+    .select({ filterByFormula: `{Role} = 'dev'`, pageSize: 100 })
+    .all();
+  return records.map(mapUser);
+}
+
 /* ---------------------------------------------------------- Feedbacks -- */
 
 export type FeedbackRecord = {
@@ -104,15 +112,19 @@ export type FeedbackRecord = {
   voteCount: number;
   creatorId: string | null;
   createdAt: string;
+  status: FeedbackStatus | null;
+  assignedToId: string | null;
 };
 
 export type FeedbackWithCreator = FeedbackRecord & {
   creatorName: string;
+  assignedToName: string | null;
 };
 
 function mapFeedback(r: AirtableRecord): FeedbackRecord {
   const f = r.fields as Record<string, unknown>;
   const creatorIds = (f.Creator as string[] | undefined) ?? [];
+  const assignedIds = (f.AssignedTo as string[] | undefined) ?? [];
   return {
     id: r.id,
     title: String(f.Title ?? ""),
@@ -121,20 +133,25 @@ function mapFeedback(r: AirtableRecord): FeedbackRecord {
     voteCount: typeof f.VoteCount === "number" ? f.VoteCount : 0,
     creatorId: creatorIds[0] ?? null,
     createdAt: String(f.CreatedAt ?? ""),
+    status: (f.Status as FeedbackStatus | undefined) ?? null,
+    assignedToId: assignedIds[0] ?? null,
   };
 }
 
-async function enrichWithCreators(
+async function enrichWithUsers(
   feedbacks: FeedbackRecord[],
 ): Promise<FeedbackWithCreator[]> {
-  const creatorIds = feedbacks
-    .map((f) => f.creatorId)
-    .filter((id): id is string => Boolean(id));
-  const users = await getUsersByIds(creatorIds);
+  const ids = new Set<string>();
+  for (const f of feedbacks) {
+    if (f.creatorId) ids.add(f.creatorId);
+    if (f.assignedToId) ids.add(f.assignedToId);
+  }
+  const users = await getUsersByIds(Array.from(ids));
   const byId = new Map(users.map((u) => [u.id, u.name]));
   return feedbacks.map((f) => ({
     ...f,
     creatorName: f.creatorId ? (byId.get(f.creatorId) ?? "Anonyme") : "Anonyme",
+    assignedToName: f.assignedToId ? (byId.get(f.assignedToId) ?? null) : null,
   }));
 }
 
@@ -146,7 +163,7 @@ export async function listFeedbacks(): Promise<FeedbackWithCreator[]> {
     })
     .all();
   const feedbacks = records.map(mapFeedback);
-  return enrichWithCreators(feedbacks);
+  return enrichWithUsers(feedbacks);
 }
 
 export async function getFeedbackById(
@@ -159,7 +176,7 @@ export async function getFeedbackById(
     return null;
   }
   const feedback = mapFeedback(record);
-  const enriched = await enrichWithCreators([feedback]);
+  const enriched = await enrichWithUsers([feedback]);
   return enriched[0] ?? null;
 }
 
@@ -207,6 +224,48 @@ export async function incrementVoteCount(
 ): Promise<void> {
   await feedbacksTable.update([
     { id, fields: { VoteCount: current + 1 } },
+  ]);
+}
+
+export async function listBacklogFeedbacks(): Promise<FeedbackWithCreator[]> {
+  const records = await feedbacksTable
+    .select({
+      filterByFormula: `{Status} != ''`,
+      sort: [{ field: "VoteCount", direction: "desc" }],
+      pageSize: 100,
+    })
+    .all();
+  const feedbacks = records.map(mapFeedback);
+  return enrichWithUsers(feedbacks);
+}
+
+export async function setFeedbackStatus(
+  id: string,
+  status: FeedbackStatus | null,
+): Promise<void> {
+  await feedbacksTable.update([
+    { id, fields: { Status: status ?? null } },
+  ]);
+}
+
+export async function assignFeedback(
+  id: string,
+  userId: string | null,
+): Promise<void> {
+  await feedbacksTable.update([
+    { id, fields: { AssignedTo: userId ? [userId] : [] } },
+  ]);
+}
+
+export async function sendToBacklog(id: string): Promise<void> {
+  await feedbacksTable.update([
+    { id, fields: { Status: "to_do", AssignedTo: [] } },
+  ]);
+}
+
+export async function removeFromBacklog(id: string): Promise<void> {
+  await feedbacksTable.update([
+    { id, fields: { Status: null, AssignedTo: [] } },
   ]);
 }
 

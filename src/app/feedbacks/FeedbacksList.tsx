@@ -16,8 +16,10 @@ type Filter = FeedbackType | "all";
 
 export function FeedbacksList({
   feedbacks,
+  currentUserId,
 }: {
   feedbacks: FeedbackWithCreator[];
+  currentUserId: string | null;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -84,7 +86,11 @@ export function FeedbacksList({
       ) : (
         <div className="flex flex-col gap-3">
           {filtered.map((feedback) => (
-            <FeedbackCard key={feedback.id} feedback={feedback} />
+            <FeedbackCard
+              key={feedback.id}
+              feedback={feedback}
+              currentUserId={currentUserId}
+            />
           ))}
         </div>
       )}

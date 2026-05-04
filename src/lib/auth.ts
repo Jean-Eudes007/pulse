@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 const COOKIE_NAME = "pulse_token";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 
-export type Role = "user" | "admin";
+export type Role = "user" | "dev" | "admin";
 
 export type AuthUser = {
   id: string;

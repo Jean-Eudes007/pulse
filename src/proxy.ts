@@ -1,6 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_PATHS = ["/submit", "/admin", "/feedback/", "/feedbacks"];
+const PROTECTED_PATHS = [
+  "/submit",
+  "/admin",
+  "/feedback/",
+  "/feedbacks",
+  "/dev",
+];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,5 +23,11 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/submit", "/admin/:path*", "/feedback/:path*", "/feedbacks"],
+  matcher: [
+    "/submit",
+    "/admin/:path*",
+    "/feedback/:path*",
+    "/feedbacks",
+    "/dev/:path*",
+  ],
 };

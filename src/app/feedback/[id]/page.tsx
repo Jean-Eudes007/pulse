@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { StatusBadge } from "@/components/StatusBadge";
 import { TypeBadge } from "@/components/TypeBadge";
 import { findVote, getFeedbackById } from "@/lib/airtable";
 import { getCurrentUser } from "@/lib/auth";
@@ -50,6 +51,14 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
             </div>
             <TypeBadge type={feedback.type} />
           </div>
+          {feedback.status && (
+            <div>
+              <div className="text-[11px] uppercase text-text-tertiary mb-1">
+                Statut
+              </div>
+              <StatusBadge status={feedback.status} />
+            </div>
+          )}
           <div>
             <div className="text-[11px] uppercase text-text-tertiary mb-1">
               Créé par
@@ -58,6 +67,16 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
               {feedback.creatorName}
             </div>
           </div>
+          {feedback.assignedToName && (
+            <div>
+              <div className="text-[11px] uppercase text-text-tertiary mb-1">
+                Assigné à
+              </div>
+              <div className="font-medium text-text-primary">
+                {feedback.assignedToName}
+              </div>
+            </div>
+          )}
           <div>
             <div className="text-[11px] uppercase text-text-tertiary mb-1">
               Votes

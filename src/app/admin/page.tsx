@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { StatusBadge } from "@/components/StatusBadge";
 import { TypeBadge } from "@/components/TypeBadge";
 import { listFeedbacks } from "@/lib/airtable";
 import { getCurrentUser } from "@/lib/auth";
+import { AdminBacklogButton } from "./AdminBacklogButton";
 import { AdminDeleteButton } from "./AdminDeleteButton";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +20,15 @@ export default async function AdminPage() {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8">
-        <h1 className="text-base font-medium mb-6">Dashboard Admin</h1>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+          <h1 className="text-base font-medium">Dashboard Admin</h1>
+          <Link
+            href="/dev"
+            className="text-xs text-text-secondary hover:text-text-primary underline"
+          >
+            Voir le kanban →
+          </Link>
+        </div>
 
         {feedbacks.length === 0 ? (
           <div className="rounded-md border border-dashed border-border-tertiary p-8 text-center">
@@ -40,8 +50,9 @@ export default async function AdminPage() {
                     {f.title}
                   </Link>
 
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
                     <TypeBadge type={f.type} />
+                    {f.status && <StatusBadge status={f.status} />}
                     <span className="text-sm font-medium text-text-primary tabular-nums">
                       {f.voteCount} ⭐
                     </span>
@@ -49,15 +60,18 @@ export default async function AdminPage() {
 
                   <div className="flex items-center justify-between gap-2 text-xs text-text-secondary">
                     <span>par {f.creatorName}</span>
-                    <AdminDeleteButton feedbackId={f.id} />
+                    <div className="flex items-center gap-2">
+                      {!f.status && <AdminBacklogButton feedbackId={f.id} />}
+                      <AdminDeleteButton feedbackId={f.id} />
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Desktop : tableau */}
-            <div className="hidden sm:block">
-              <table className="w-full text-sm">
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="w-full text-sm min-w-[720px]">
                 <thead>
                   <tr className="border-b border-border-tertiary">
                     <th className="text-left py-3 text-[11px] uppercase font-medium text-text-secondary">
@@ -69,11 +83,14 @@ export default async function AdminPage() {
                     <th className="text-left py-3 text-[11px] uppercase font-medium text-text-secondary">
                       Type
                     </th>
+                    <th className="text-left py-3 text-[11px] uppercase font-medium text-text-secondary">
+                      Statut
+                    </th>
                     <th className="text-center py-3 text-[11px] uppercase font-medium text-text-secondary">
                       Votes
                     </th>
                     <th className="text-center py-3 text-[11px] uppercase font-medium text-text-secondary">
-                      Action
+                      Actions
                     </th>
                   </tr>
                 </thead>
@@ -97,11 +114,21 @@ export default async function AdminPage() {
                       <td className="py-3 pr-3">
                         <TypeBadge type={f.type} />
                       </td>
+                      <td className="py-3 pr-3">
+                        {f.status ? (
+                          <StatusBadge status={f.status} />
+                        ) : (
+                          <span className="text-xs text-text-tertiary">—</span>
+                        )}
+                      </td>
                       <td className="py-3 px-3 text-center font-medium text-text-primary tabular-nums">
                         {f.voteCount}
                       </td>
                       <td className="py-3 text-center">
-                        <AdminDeleteButton feedbackId={f.id} />
+                        <div className="flex items-center justify-end gap-2">
+                          {!f.status && <AdminBacklogButton feedbackId={f.id} />}
+                          <AdminDeleteButton feedbackId={f.id} />
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -112,7 +139,11 @@ export default async function AdminPage() {
         )}
 
         <p className="text-[11px] text-text-tertiary text-center mt-6">
-          Visible uniquement pour role = admin
+          Visible uniquement pour role = admin · Bouton 📌 envoie au backlog
+          dev · Suivez l'avancement dans{" "}
+          <Link href="/dev" className="underline">
+            le kanban
+          </Link>
         </p>
       </div>
     </div>

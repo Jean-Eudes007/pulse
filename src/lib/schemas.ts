@@ -3,6 +3,26 @@ import { z } from "zod";
 export const FEEDBACK_TYPES = ["bug", "idée", "amélioration"] as const;
 export type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 
+// Workflow statuses (4 columns of the dev kanban). null = not yet in backlog.
+export const FEEDBACK_STATUSES = [
+  "to_do",
+  "in_progress",
+  "review",
+  "done",
+] as const;
+export type FeedbackStatus = (typeof FEEDBACK_STATUSES)[number];
+
+// Allowed transitions enforced server-side
+export const STATUS_TRANSITIONS: Record<
+  FeedbackStatus,
+  readonly FeedbackStatus[]
+> = {
+  to_do: ["in_progress"],
+  in_progress: ["review", "to_do"],
+  review: ["done", "in_progress"],
+  done: ["review"],
+};
+
 // N-1: NIST 800-63B aligns on length over complexity rules.
 // 10 chars min keeps demo passwords like "password123" (11 chars) valid
 // while raising entropy floor.
@@ -24,6 +44,14 @@ export const createFeedbackSchema = z.object({
 });
 
 export const updateFeedbackSchema = createFeedbackSchema.partial();
+
+export const statusUpdateSchema = z.object({
+  status: z.enum(FEEDBACK_STATUSES),
+});
+
+export const assignSchema = z.object({
+  userId: z.string().nullable(),
+});
 
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

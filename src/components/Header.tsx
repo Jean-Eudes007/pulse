@@ -32,6 +32,14 @@ export async function Header() {
               Soumettre
             </Link>
           )}
+          {(user?.role === "dev" || user?.role === "admin") && (
+            <Link
+              href="/dev"
+              className="text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Kanban
+            </Link>
+          )}
           {user?.role === "admin" && (
             <Link
               href="/admin"

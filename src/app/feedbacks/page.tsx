@@ -13,7 +13,7 @@ export default async function FeedbacksPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <FeedbacksList feedbacks={feedbacks} />
+      <FeedbacksList feedbacks={feedbacks} currentUserId={user.id} />
     </div>
   );
 }
