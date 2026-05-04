@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { FEEDBACK_TYPES, type FeedbackType } from "@/lib/schemas";
 
 const TYPE_LABELS: Record<FeedbackType, string> = {
@@ -59,6 +60,7 @@ export function FeedbackActions(props: Props) {
     const data = await res.json();
     setVoteCount(data.voteCount);
     setHasVoted(true);
+    toast.success("Vote enregistré");
     router.refresh();
   }
 
@@ -78,6 +80,7 @@ export function FeedbackActions(props: Props) {
       return;
     }
     setEditing(false);
+    toast.success("Feedback modifié");
     router.refresh();
   }
 
@@ -94,6 +97,7 @@ export function FeedbackActions(props: Props) {
       setError(data.error ?? "Erreur lors de la suppression");
       return;
     }
+    toast.success("Feedback supprimé");
     router.push("/feedbacks");
     router.refresh();
   }

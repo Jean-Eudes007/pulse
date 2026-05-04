@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { FEEDBACK_TYPES, type FeedbackType } from "@/lib/schemas";
 
 const TYPE_LABELS: Record<FeedbackType, string> = {
@@ -41,6 +42,7 @@ export default function SubmitPage() {
       return;
     }
 
+    toast.success("Feedback créé");
     router.refresh();
     router.push("/feedbacks");
   }

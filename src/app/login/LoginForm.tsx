@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function LoginForm() {
   const router = useRouter();
@@ -33,6 +34,7 @@ export function LoginForm() {
       return;
     }
 
+    toast.success("Connexion réussie");
     router.refresh();
     router.push(redirectTo);
   }

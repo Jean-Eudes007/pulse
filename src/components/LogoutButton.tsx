@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -10,8 +11,9 @@ export function LogoutButton() {
   async function handleClick() {
     setPending(true);
     await fetch("/api/auth/logout", { method: "POST" });
+    toast.success("Déconnecté");
     router.refresh();
-    router.push("/feedbacks");
+    router.push("/");
   }
 
   return (

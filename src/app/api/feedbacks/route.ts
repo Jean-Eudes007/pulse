@@ -5,6 +5,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { createFeedbackSchema } from "@/lib/schemas";
 
 export async function GET() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
   const feedbacks = await listFeedbacks();
   return NextResponse.json({ feedbacks });
 }

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export function AdminDeleteButton({ feedbackId }: { feedbackId: string }) {
   const router = useRouter();
@@ -15,9 +16,10 @@ export function AdminDeleteButton({ feedbackId }: { feedbackId: string }) {
     });
     setPending(false);
     if (!res.ok) {
-      alert("Erreur lors de la suppression");
+      toast.error("Erreur lors de la suppression");
       return;
     }
+    toast.success("Feedback supprimé");
     router.refresh();
   }
 

@@ -16,12 +16,14 @@ export async function Header() {
         </Link>
 
         <nav className="flex items-center gap-4 text-sm">
-          <Link
-            href="/feedbacks"
-            className="text-text-secondary hover:text-text-primary transition-colors"
-          >
-            Liste
-          </Link>
+          {user && (
+            <Link
+              href="/feedbacks"
+              className="text-text-secondary hover:text-text-primary transition-colors"
+            >
+              Liste
+            </Link>
+          )}
           {user && (
             <Link
               href="/submit"

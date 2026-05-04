@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -31,6 +32,7 @@ export default function SignupPage() {
       return;
     }
 
+    toast.success("Bienvenue sur Pulse !");
     router.refresh();
     router.push("/feedbacks");
   }
