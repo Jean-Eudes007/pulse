@@ -24,12 +24,20 @@ export default async function AdminPage() {
           <h1 className="text-lg font-semibold text-text-primary">
             Dashboard Admin
           </h1>
-          <Link
-            href="/dev"
-            className="text-xs text-text-secondary hover:text-text-primary underline"
-          >
-            Voir le kanban →
-          </Link>
+          <div className="flex items-center gap-4 text-xs">
+            <Link
+              href="/admin/analytics"
+              className="text-text-secondary hover:text-text-primary underline"
+            >
+              📊 Analytics
+            </Link>
+            <Link
+              href="/dev"
+              className="text-text-secondary hover:text-text-primary underline"
+            >
+              Voir le kanban →
+            </Link>
+          </div>
         </div>
 
         {feedbacks.length === 0 ? (
