@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   deleteAllNotifications,
@@ -40,6 +41,9 @@ export async function DELETE(request: Request) {
   } else {
     await deleteAllNotifications(user.id);
   }
+
+  // Invalidate the /feedbacks server cache so the banner refetches fresh
+  revalidatePath("/feedbacks");
 
   return NextResponse.json({ ok: true });
 }

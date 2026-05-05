@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   assignFeedback,
@@ -54,6 +55,8 @@ export async function POST(_request: Request, context: RouteContext) {
     });
   }
 
+  revalidatePath("/feedbacks");
+  revalidatePath("/dev");
   return NextResponse.json({
     ok: true,
     status: "in_progress",

@@ -21,7 +21,9 @@ export default async function AdminPage() {
     <div className="max-w-5xl mx-auto">
       <div className="bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8">
         <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-          <h1 className="text-base font-medium">Dashboard Admin</h1>
+          <h1 className="text-lg font-semibold text-text-primary">
+            Dashboard Admin
+          </h1>
           <Link
             href="/dev"
             className="text-xs text-text-secondary hover:text-text-primary underline"

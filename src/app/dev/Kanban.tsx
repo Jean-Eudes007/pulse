@@ -211,7 +211,9 @@ export function Kanban({
     >
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-base font-medium">Kanban dev</h1>
+          <h1 className="text-lg font-semibold text-text-primary">
+            Kanban dev
+          </h1>
           <p className="text-xs text-text-tertiary mt-1">
             {isDev &&
               `Vue dev — ${isDesktop ? "drag-drop ou boutons" : "boutons"} pour déplacer tes tickets`}

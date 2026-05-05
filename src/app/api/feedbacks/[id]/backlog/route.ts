@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   deleteNotificationForFeedback,
@@ -41,6 +42,9 @@ export async function POST(_request: Request, context: RouteContext) {
     });
   }
 
+  revalidatePath("/feedbacks");
+  revalidatePath("/admin");
+  revalidatePath("/dev");
   return NextResponse.json({ ok: true, status: "to_do" });
 }
 
@@ -69,5 +73,8 @@ export async function DELETE(_request: Request, context: RouteContext) {
     await deleteNotificationForFeedback(feedback.creatorId, id);
   }
 
+  revalidatePath("/feedbacks");
+  revalidatePath("/admin");
+  revalidatePath("/dev");
   return NextResponse.json({ ok: true });
 }

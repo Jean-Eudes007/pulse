@@ -39,7 +39,9 @@ export function FeedbacksList({
   return (
     <div className="bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8">
       <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
-        <h1 className="text-base font-medium">Liste des feedbacks</h1>
+        <h1 className="text-lg font-semibold text-text-primary">
+          Liste des feedbacks
+        </h1>
         <Link
           href="/submit"
           className="rounded-md bg-action text-text-info px-3 py-1.5 text-sm font-medium hover:bg-action-hover transition-colors"

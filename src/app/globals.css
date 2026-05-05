@@ -37,6 +37,13 @@
   --color-highlight-text: #713f12;
   --color-highlight-stripe: #fde68a;
 
+  /* Info banner (notifications) */
+  --color-info-bg: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-info-text: #1e3a8a;
+  --color-info-text-muted: #1d4ed8;
+  --color-info-stripe: #dbeafe;
+
   /* Radii */
   --radius-md: 6px;
   --radius-lg: 12px;
@@ -72,6 +79,12 @@
   --color-highlight-border: #a16207;
   --color-highlight-text: #fde68a;
   --color-highlight-stripe: #422f08;
+
+  --color-info-bg: #0e2348;
+  --color-info-border: #1e40af;
+  --color-info-text: #dbeafe;
+  --color-info-text-muted: #93c5fd;
+  --color-info-stripe: #1e3a8a;
 }
 
 html,

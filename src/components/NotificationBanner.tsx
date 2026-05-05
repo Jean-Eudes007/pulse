@@ -21,7 +21,7 @@ export function NotificationBanner() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/api/notifications")
+    fetch("/api/notifications", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : { notifications: [] }))
       .then((d) => {
         if (!cancelled) setNotifs(d.notifications ?? []);
@@ -49,14 +49,14 @@ export function NotificationBanner() {
   }
 
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 sm:p-5 mb-4">
+    <div className="bg-info-bg border border-info-border rounded-lg p-4 sm:p-5 mb-4">
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
-          <p className="text-sm font-medium text-blue-900">
+          <p className="text-sm font-semibold text-info-text">
             🔔 {notifs.length}{" "}
             {notifs.length > 1 ? "de tes feedbacks ont avancé" : "de tes feedbacks a avancé"}
           </p>
-          <p className="text-xs text-blue-700/80 mt-0.5">
+          <p className="text-xs text-info-text-muted mt-0.5">
             Clique pour voir le détail, ou ferme la notif quand tu as vu.
           </p>
         </div>
@@ -65,7 +65,7 @@ export function NotificationBanner() {
           onClick={dismissAll}
           disabled={dismissing}
           aria-label="Tout marquer comme vu"
-          className="shrink-0 rounded-md bg-blue-100 hover:bg-blue-200 text-blue-900 w-7 h-7 flex items-center justify-center text-sm transition-colors disabled:opacity-50"
+          className="shrink-0 rounded-md bg-info-stripe hover:brightness-110 text-info-text w-7 h-7 flex items-center justify-center text-sm transition-colors disabled:opacity-50"
         >
           ×
         </button>
@@ -80,10 +80,10 @@ export function NotificationBanner() {
             <li key={n.id}>
               <Link
                 href={`/feedback/${n.feedback.id}`}
-                className="block rounded-md px-2 py-1.5 -mx-2 hover:bg-blue-100/60 transition-colors text-sm text-blue-900"
+                className="block rounded-md px-2 py-1.5 -mx-2 hover:bg-info-stripe/60 transition-colors text-sm text-info-text"
               >
                 <span className="font-medium">{n.feedback.title}</span>{" "}
-                <span className="text-blue-700/90">— {message}</span>
+                <span className="text-info-text-muted">— {message}</span>
               </Link>
             </li>
           );

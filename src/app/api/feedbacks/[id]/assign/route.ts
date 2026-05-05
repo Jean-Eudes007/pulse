@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import {
@@ -63,5 +64,6 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   await assignFeedback(id, targetUserId);
+  revalidatePath("/dev");
   return NextResponse.json({ ok: true, assignedToId: targetUserId });
 }
