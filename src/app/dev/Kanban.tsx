@@ -12,6 +12,7 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import confetti from "canvas-confetti";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -47,6 +48,23 @@ type Props = {
   currentUserRole: Role;
   devs: DevLite[];
 };
+
+function celebrate() {
+  // Fire two bursts from the bottom corners
+  const opts = { spread: 70, ticks: 200, gravity: 1, scalar: 0.9 };
+  confetti({
+    ...opts,
+    particleCount: 80,
+    origin: { x: 0.2, y: 0.85 },
+    angle: 60,
+  });
+  confetti({
+    ...opts,
+    particleCount: 80,
+    origin: { x: 0.8, y: 0.85 },
+    angle: 120,
+  });
+}
 
 function useIsDesktop() {
   const [isDesktop, setIsDesktop] = useState(false);
@@ -118,6 +136,7 @@ export function Kanban({
   async function handleStatus(id: string, status: FeedbackStatus) {
     if (!(await callApi(id, "/status", "PATCH", { status }))) return;
     toast.success(`Statut → ${COLUMN_LABELS[status]}`);
+    if (status === "done") celebrate();
     router.refresh();
   }
 
@@ -175,6 +194,7 @@ export function Kanban({
       return;
     }
     toast.success(`Déplacé → ${COLUMN_LABELS[targetStatus]}`);
+    if (targetStatus === "done") celebrate();
     router.refresh();
     // Clear optimistic after refresh — the new server data is canonical
     setTimeout(() => {
