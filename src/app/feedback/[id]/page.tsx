@@ -3,9 +3,10 @@ import { notFound } from "next/navigation";
 import { MarkSeenOnMount } from "@/components/MarkSeenOnMount";
 import { StatusBadge } from "@/components/StatusBadge";
 import { TypeBadge } from "@/components/TypeBadge";
-import { findVote, getFeedbackById } from "@/lib/airtable";
+import { findVote, getFeedbackById, listComments } from "@/lib/airtable";
 import { getCurrentUser } from "@/lib/auth";
 import { formatDate } from "@/lib/format";
+import { CommentForm } from "./CommentForm";
 import { FeedbackActions } from "./FeedbackActions";
 
 export const dynamic = "force-dynamic";
@@ -17,9 +18,10 @@ type PageProps = {
 export default async function FeedbackDetailPage({ params }: PageProps) {
   const { id } = await params;
 
-  const [feedback, currentUser] = await Promise.all([
+  const [feedback, currentUser, comments] = await Promise.all([
     getFeedbackById(id),
     getCurrentUser(),
+    listComments(id),
   ]);
 
   if (!feedback) notFound();
@@ -118,6 +120,46 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
         <p className="text-[11px] text-text-tertiary text-center mt-6">
           Modifier/Supprimer visibles si Creator = Current User
         </p>
+      </div>
+
+      {/* Comments */}
+      <div className="bg-bg-primary border border-border-tertiary rounded-lg p-5 sm:p-8 mt-4">
+        <h2 className="text-base font-semibold text-text-primary mb-4">
+          Commentaires {comments.length > 0 && (
+            <span className="text-text-tertiary font-normal">
+              ({comments.length})
+            </span>
+          )}
+        </h2>
+
+        {comments.length === 0 ? (
+          <p className="text-sm text-text-secondary mb-6">
+            Aucun commentaire pour le moment. Sois le premier à réagir.
+          </p>
+        ) : (
+          <ul className="space-y-4 mb-6">
+            {comments.map((c) => (
+              <li
+                key={c.id}
+                className="border-l-2 border-border-tertiary pl-4"
+              >
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-sm font-medium text-text-primary">
+                    {c.authorName}
+                  </span>
+                  <span className="text-xs text-text-tertiary">
+                    {formatDate(c.createdAt)}
+                  </span>
+                </div>
+                <p className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
+                  {c.body}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {currentUser && <CommentForm feedbackId={feedback.id} />}
       </div>
     </div>
   );

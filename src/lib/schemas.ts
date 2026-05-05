@@ -53,6 +53,10 @@ export const assignSchema = z.object({
   userId: z.string().nullable(),
 });
 
+export const createCommentSchema = z.object({
+  body: z.string().min(1, "Le commentaire ne peut pas être vide").max(2000),
+});
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateFeedbackInput = z.infer<typeof createFeedbackSchema>;
