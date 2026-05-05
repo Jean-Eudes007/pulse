@@ -17,9 +17,11 @@ type Filter = FeedbackType | "all";
 export function FeedbacksList({
   feedbacks,
   currentUserId,
+  notifiedFeedbackIds,
 }: {
   feedbacks: FeedbackWithCreator[];
   currentUserId: string | null;
+  notifiedFeedbackIds: Set<string>;
 }) {
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -92,6 +94,7 @@ export function FeedbacksList({
               key={feedback.id}
               feedback={feedback}
               currentUserId={currentUserId}
+              hasNotification={notifiedFeedbackIds.has(feedback.id)}
             />
           ))}
         </div>

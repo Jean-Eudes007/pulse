@@ -7,13 +7,17 @@ import { TypeBadge } from "./TypeBadge";
 export function FeedbackCard({
   feedback,
   currentUserId,
+  hasNotification = false,
 }: {
   feedback: FeedbackWithCreator;
   currentUserId: string | null;
+  hasNotification?: boolean;
 }) {
   const isOwner = currentUserId !== null && feedback.creatorId === currentUserId;
-  const hasStatus = Boolean(feedback.status);
-  const showHighlight = isOwner && hasStatus;
+  // Show the "Statut mis à jour" highlight only if the creator has a
+  // pending notification for this feedback (i.e. they haven't acknowledged
+  // the change yet by visiting the detail or dismissing the banner).
+  const showHighlight = isOwner && hasNotification;
 
   return (
     <Link
