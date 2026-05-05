@@ -13,6 +13,10 @@ type RouteContext = {
 };
 
 export async function GET(_request: Request, context: RouteContext) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  }
   const { id } = await context.params;
   const feedback = await getFeedbackById(id);
   if (!feedback) {

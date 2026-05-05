@@ -1,3 +1,4 @@
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 // I-3: security headers
@@ -31,4 +32,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// withSentryConfig wraps the Next config to enable source map upload to
+// Sentry at build time. Without SENTRY_AUTH_TOKEN it stays silent and
+// only the runtime SDK works (still useful for capturing errors with
+// minified stack traces).
+export default withSentryConfig(nextConfig, {
+  silent: !process.env.SENTRY_AUTH_TOKEN,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  // Skip source map upload entirely if no auth token — keeps local dev
+  // and CI builds from failing on Sentry's API.
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+  tunnelRoute: "/monitoring",
+});

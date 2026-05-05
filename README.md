@@ -174,11 +174,17 @@ Les vérifications de propriété sont **dans les API routes**, pas dans l'UI :
 
 ### Tests d'attaque effectués (manuels)
 - ✅ User A tente `PATCH /api/feedbacks/<id-de-B>` → 403
-- ✅ User non connecté → 401 sur tous les endpoints sensibles
+- ✅ User non connecté → 401 sur tous les endpoints sensibles (y compris `GET /api/feedbacks/[id]`)
 - ✅ User normal essaie `/admin` → redirigé vers `/feedbacks`
 - ✅ Vote 2× sur le même feedback → 409, `VoteCount` inchangé
 - ✅ Token JWT bidouillé (signature invalide) → 401
 - ✅ Token Airtable absent du JS bundle vérifié dans Network tab
+- ✅ Login avec email inexistant : latence égale à un email valide (timing attack mitigé via `dummyVerify`)
+
+### Hardening additionnel
+- **Length caps Zod** : `email.max(254)` (RFC 5321), `password.max(128)` → empêche un payload géant qui ferait boucler bcrypt côté serverless
+- **Vercel Analytics** + **Sentry** (optionnel via `SENTRY_DSN` env var) → monitoring d'erreurs et Web Vitals en prod
+- **Tests E2E Playwright** sur 10 scenarios critiques (signup, login, vote, anti-double-vote, permissions cross-user, kanban workflow)
 
 ---
 
@@ -211,13 +217,17 @@ Voir [Schéma Airtable](#schéma-airtable) ci-dessous.
 
 ```bash
 cp .env.example .env.local
-# Éditer .env.local et remplir :
+# Éditer .env.local et remplir au minimum :
 #   AIRTABLE_TOKEN=patXXXXXXXXXXXXXX...
 #   AIRTABLE_BASE_ID=appXXXXXXXXXXXXXX
 #   JWT_SECRET=$(openssl rand -base64 48)
 ```
 
-⚠️ **Ne jamais préfixer ces vars avec `NEXT_PUBLIC_`** — ce serait exposer le token côté client.
+Variables optionnelles :
+- `SENTRY_DSN` + `NEXT_PUBLIC_SENTRY_DSN` (même valeur) — active le monitoring d'erreurs Sentry. Sans ces vars, le SDK reste no-op.
+- `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` — pour l'upload de source maps au build (facultatif).
+
+⚠️ **Ne jamais préfixer `AIRTABLE_TOKEN`, `AIRTABLE_BASE_ID`, `JWT_SECRET` avec `NEXT_PUBLIC_`** — ce serait exposer le token côté client.
 
 ### 5. Lancer
 

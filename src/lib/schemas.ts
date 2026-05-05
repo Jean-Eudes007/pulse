@@ -26,15 +26,20 @@ export const STATUS_TRANSITIONS: Record<
 // N-1: NIST 800-63B aligns on length over complexity rules.
 // 10 chars min keeps demo passwords like "password123" (11 chars) valid
 // while raising entropy floor.
+// I-4: explicit max() caps prevent CPU-DoS via huge payloads (bcrypt
+// on a 10MB password would loop forever even on serverless).
 export const signupSchema = z.object({
-  email: z.string().email("Email invalide"),
-  password: z.string().min(10, "Mot de passe min. 10 caractères"),
+  email: z.string().email("Email invalide").max(254), // RFC 5321 limit
+  password: z
+    .string()
+    .min(10, "Mot de passe min. 10 caractères")
+    .max(128, "Mot de passe max. 128 caractères"),
   name: z.string().min(1, "Nom requis").max(80),
 });
 
 export const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1),
+  email: z.string().email().max(254),
+  password: z.string().min(1).max(128),
 });
 
 export const createFeedbackSchema = z.object({

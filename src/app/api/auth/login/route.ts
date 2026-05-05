@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getUserByEmail } from "@/lib/airtable";
-import { setAuthCookie, verifyPassword } from "@/lib/auth";
+import { dummyVerify, setAuthCookie, verifyPassword } from "@/lib/auth";
 import { loginSchema } from "@/lib/schemas";
 
 export async function POST(request: Request) {
@@ -20,6 +20,9 @@ export async function POST(request: Request) {
   const { email, password } = parsed.data;
   const user = await getUserByEmail(email);
   if (!user) {
+    // Spend equivalent bcrypt time so an attacker can't tell from the
+    // response latency whether the email exists. Same 401 message either way.
+    await dummyVerify(password);
     return NextResponse.json(
       { error: "Email ou mot de passe incorrect" },
       { status: 401 },

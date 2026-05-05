@@ -30,6 +30,17 @@ export async function verifyPassword(
   return bcrypt.compare(password, hash);
 }
 
+// I-1: a dummy bcrypt hash used to equalize login timing when an email
+// doesn't exist. bcrypt.compare against this hash spends the same CPU
+// as a real verify, preventing timing-based account enumeration.
+// Hash of literal "dummy" with cost 10 — value is deterministic, no
+// secret here.
+const DUMMY_HASH = bcrypt.hashSync("dummy", 10);
+
+export async function dummyVerify(password: string): Promise<void> {
+  await bcrypt.compare(password, DUMMY_HASH);
+}
+
 export function signToken(user: AuthUser): string {
   return jwt.sign(
     { sub: user.id, email: user.email, role: user.role },
