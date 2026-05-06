@@ -1,3 +1,4 @@
+import { AIRTABLE_PAGE_SIZE } from "../config";
 import type { FeedbackStatus, FeedbackType } from "../schemas";
 import {
   type AirtableRecord,
@@ -62,7 +63,7 @@ export async function listFeedbacks(): Promise<FeedbackWithCreator[]> {
   const records = await feedbacksTable
     .select({
       sort: [{ field: "VoteCount", direction: "desc" }],
-      pageSize: 100,
+      pageSize: AIRTABLE_PAGE_SIZE,
     })
     .all();
   const feedbacks = records.map(mapFeedback);
@@ -133,7 +134,7 @@ export async function listBacklogFeedbacks(): Promise<FeedbackWithCreator[]> {
     .select({
       filterByFormula: `{Status} != ''`,
       sort: [{ field: "VoteCount", direction: "desc" }],
-      pageSize: 100,
+      pageSize: AIRTABLE_PAGE_SIZE,
     })
     .all();
   const feedbacks = records.map(mapFeedback);

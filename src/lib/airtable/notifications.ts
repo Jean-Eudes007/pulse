@@ -1,3 +1,4 @@
+import { AIRTABLE_PAGE_SIZE } from "../config";
 import type { NotificationKind } from "../schemas";
 import { type AirtableRecord, nowIso, notificationsTable } from "./client";
 import {
@@ -41,7 +42,7 @@ export async function listNotifications(
     .select({
       filterByFormula: `{RecipientId} = '${recipientId}'`,
       sort: [{ field: "UpdatedAt", direction: "desc" }],
-      pageSize: 100,
+      pageSize: AIRTABLE_PAGE_SIZE,
     })
     .all();
   const notifs = records.map(mapNotification);
@@ -111,7 +112,7 @@ export async function deleteAllNotifications(
   const records = await notificationsTable
     .select({
       filterByFormula: `{RecipientId} = '${recipientId}'`,
-      pageSize: 100,
+      pageSize: AIRTABLE_PAGE_SIZE,
     })
     .all();
   if (records.length === 0) return;

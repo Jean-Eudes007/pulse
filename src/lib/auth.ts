@@ -1,9 +1,7 @@
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-
-const COOKIE_NAME = "pulse_token";
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+import { BCRYPT_COST, COOKIE_MAX_AGE_SECONDS, COOKIE_NAME } from "./config";
 
 export type Role = "user" | "dev" | "admin";
 
@@ -20,7 +18,7 @@ function getJwtSecret(): string {
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
+  return bcrypt.hash(password, BCRYPT_COST);
 }
 
 export async function verifyPassword(
@@ -35,7 +33,7 @@ export async function verifyPassword(
 // as a real verify, preventing timing-based account enumeration.
 // Hash of literal "dummy" with cost 10 — value is deterministic, no
 // secret here.
-const DUMMY_HASH = bcrypt.hashSync("dummy", 10);
+const DUMMY_HASH = bcrypt.hashSync("dummy", BCRYPT_COST);
 
 export async function dummyVerify(password: string): Promise<void> {
   await bcrypt.compare(password, DUMMY_HASH);
@@ -45,7 +43,7 @@ export function signToken(user: AuthUser): string {
   return jwt.sign(
     { sub: user.id, email: user.email, role: user.role },
     getJwtSecret(),
-    { expiresIn: `${COOKIE_MAX_AGE}s` },
+    { expiresIn: `${COOKIE_MAX_AGE_SECONDS}s` },
   );
 }
 
@@ -79,7 +77,7 @@ export async function setAuthCookie(user: AuthUser): Promise<void> {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: COOKIE_MAX_AGE,
+    maxAge: COOKIE_MAX_AGE_SECONDS,
   });
 }
 
@@ -88,4 +86,3 @@ export async function clearAuthCookie(): Promise<void> {
   store.delete(COOKIE_NAME);
 }
 
-export { COOKIE_NAME };

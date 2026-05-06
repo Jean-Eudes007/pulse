@@ -1,4 +1,5 @@
 import type { Role } from "../auth";
+import { AIRTABLE_PAGE_SIZE } from "../config";
 import { type AirtableRecord, nowIso, usersTable } from "./client";
 
 export type UserRecord = {
@@ -75,7 +76,7 @@ export async function createUser(input: {
 
 export async function listDevs(): Promise<UserRecord[]> {
   const records = await usersTable
-    .select({ filterByFormula: `{Role} = 'dev'`, pageSize: 100 })
+    .select({ filterByFormula: `{Role} = 'dev'`, pageSize: AIRTABLE_PAGE_SIZE })
     .all();
   return records.map(mapUser);
 }

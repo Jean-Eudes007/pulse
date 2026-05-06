@@ -1,3 +1,4 @@
+import { AIRTABLE_PAGE_SIZE } from "../config";
 import { type AirtableRecord, commentsTable, nowIso } from "./client";
 import { getUsersByIds } from "./users";
 
@@ -33,7 +34,7 @@ export async function listComments(
     .select({
       filterByFormula: `{FeedbackId} = '${feedbackId}'`,
       sort: [{ field: "CreatedAt", direction: "asc" }],
-      pageSize: 100,
+      pageSize: AIRTABLE_PAGE_SIZE,
     })
     .all();
   const comments = records.map(mapComment);

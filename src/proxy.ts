@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { COOKIE_NAME } from "@/lib/config";
 
 const PROTECTED_PATHS = [
   "/submit",
@@ -14,7 +15,7 @@ export function proxy(request: NextRequest) {
   const isProtected = PROTECTED_PATHS.some((p) => pathname.startsWith(p));
   if (!isProtected) return NextResponse.next();
 
-  const hasCookie = Boolean(request.cookies.get("pulse_token")?.value);
+  const hasCookie = Boolean(request.cookies.get(COOKIE_NAME)?.value);
   if (hasCookie) return NextResponse.next();
 
   const loginUrl = new URL("/login", request.url);
