@@ -3,8 +3,16 @@ import { NextResponse } from "next/server";
 import { createUser, getUserByEmail } from "@/lib/airtable";
 import { parseJsonBody } from "@/lib/api-helpers";
 import { hashPassword, setAuthCookie } from "@/lib/auth";
+import {
+  getAppUrl,
+  sendEmail,
+  verificationEmailHtml,
+} from "@/lib/email";
 import { rateLimit } from "@/lib/rate-limit";
 import { signupSchema } from "@/lib/schemas";
+import { generateToken, tokenExpiry } from "@/lib/tokens";
+
+const VERIFICATION_TTL_MINUTES = 24 * 60;
 
 export async function POST(request: Request) {
   const limited = await rateLimit(request, { name: "signup", max: 3, window: "1 m" });
@@ -27,9 +35,30 @@ export async function POST(request: Request) {
   }
 
   const passwordHash = await hashPassword(password);
-  const user = await createUser({ email, passwordHash, name });
+  const verificationToken = generateToken();
+  const verificationExpires = tokenExpiry(VERIFICATION_TTL_MINUTES);
+  const user = await createUser({
+    email,
+    passwordHash,
+    name,
+    verificationToken,
+    verificationExpires,
+  });
 
-  await setAuthCookie({ id: user.id, email: user.email, role: user.role });
+  const verifyUrl = `${getAppUrl()}/api/auth/verify/${verificationToken}`;
+  await sendEmail({
+    to: user.email,
+    subject: "Activez votre compte Pulse",
+    html: verificationEmailHtml(verifyUrl),
+    devLogContext: `verifyUrl=${verifyUrl}`,
+  });
+
+  await setAuthCookie({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    emailVerifiedAt: user.emailVerifiedAt,
+  });
   revalidatePath("/", "layout");
 
   return NextResponse.json({

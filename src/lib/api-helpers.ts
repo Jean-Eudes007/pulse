@@ -16,10 +16,13 @@ function roleAllowed(userRole: Role, expected: RoleConstraint): boolean {
  *   const auth = await requireAuth();              // any authenticated user
  *   const auth = await requireAuth({ role: "admin" });
  *   const auth = await requireAuth({ role: ["admin", "dev"] });
+ *   const auth = await requireAuth({ verified: true }); // also require verified email
  *   if (auth.error) return auth.error;
  *   const { user } = auth;
  */
-export async function requireAuth(opts: { role?: RoleConstraint } = {}): Promise<
+export async function requireAuth(
+  opts: { role?: RoleConstraint; verified?: boolean } = {},
+): Promise<
   | { user: AuthUser; error: null }
   | { user: null; error: NextResponse }
 > {
@@ -34,6 +37,22 @@ export async function requireAuth(opts: { role?: RoleConstraint } = {}): Promise
     return {
       user: null,
       error: NextResponse.json({ error: "Action refusée" }, { status: 403 }),
+    };
+  }
+  // Optional email-verification gate. Active only when REQUIRE_EMAIL_VERIFICATION
+  // is set, so legacy users (created before the field existed) and dev/CI
+  // setups without Resend keep working out of the box.
+  if (
+    opts.verified &&
+    process.env.REQUIRE_EMAIL_VERIFICATION === "true" &&
+    !user.emailVerifiedAt
+  ) {
+    return {
+      user: null,
+      error: NextResponse.json(
+        { error: "Email non vérifié. Vérifiez votre boîte mail." },
+        { status: 403 },
+      ),
     };
   }
   return { user, error: null };

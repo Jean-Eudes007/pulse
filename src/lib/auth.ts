@@ -9,6 +9,11 @@ export type AuthUser = {
   id: string;
   email: string;
   role: Role;
+  // ISO timestamp when the user verified their email, or null if not yet
+  // verified. Stored in the JWT so write-gated endpoints can check
+  // without an Airtable round-trip. The cookie is re-issued on
+  // verification so the flag updates without a re-login.
+  emailVerifiedAt: string | null;
 };
 
 function getJwtSecret(): string {
@@ -41,7 +46,12 @@ export async function dummyVerify(password: string): Promise<void> {
 
 export function signToken(user: AuthUser): string {
   return jwt.sign(
-    { sub: user.id, email: user.email, role: user.role },
+    {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      ev: user.emailVerifiedAt,
+    },
     getJwtSecret(),
     { expiresIn: `${COOKIE_MAX_AGE_SECONDS}s` },
   );
@@ -55,9 +65,15 @@ export function verifyToken(token: string): AuthUser | null {
       sub: string;
       email: string;
       role: Role;
+      ev?: string | null;
     };
     if (!payload.sub || !payload.email || !payload.role) return null;
-    return { id: payload.sub, email: payload.email, role: payload.role };
+    return {
+      id: payload.sub,
+      email: payload.email,
+      role: payload.role,
+      emailVerifiedAt: payload.ev ?? null,
+    };
   } catch {
     return null;
   }

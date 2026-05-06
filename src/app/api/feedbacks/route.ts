@@ -13,7 +13,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await requireAuth();
+  const auth = await requireAuth({ verified: true });
   if (auth.error) return auth.error;
   const { user } = auth;
 

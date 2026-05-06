@@ -225,6 +225,8 @@ cp .env.example .env.local
 ```
 
 Variables optionnelles :
+- `RESEND_API_KEY` (+ `RESEND_FROM_EMAIL`, `APP_URL`) — active l'envoi des emails de vérification et de reset password. Sans la clé, les URLs sont loggées dans la console serveur (suffisant en dev). Free tier 3k emails/mois.
+- `REQUIRE_EMAIL_VERIFICATION=true` — active le gate API qui bloque `POST /api/feedbacks`, `/vote`, `/comments` pour les utilisateurs non vérifiés. Off par défaut pour ne pas casser les seeds existants — à activer après migration manuelle.
 - `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` — active le rate limiting per-IP. Sans ces vars, le limiteur est no-op (pratique en dev/CI).
 - `SENTRY_DSN` + `NEXT_PUBLIC_SENTRY_DSN` (même valeur) — active le monitoring d'erreurs Sentry. Sans ces vars, le SDK reste no-op.
 - `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` — pour l'upload de source maps au build (facultatif).
@@ -297,8 +299,15 @@ Le workflow `e2e` dans GitHub Actions exécute les 10 tests Playwright sur chaqu
 | `Email` | Single line text | **Primary**, unique (vérifié à signup) |
 | `PasswordHash` | Long text | bcrypt cost 10, jamais le password en clair |
 | `Name` | Single line text | nom affiché |
-| `Role` | Single select | `user` (default) · `admin` |
+| `Role` | Single select | `user` (default) · `dev` · `admin` |
 | `CreatedAt` | dateTime | rempli explicitement à signup |
+| `EmailVerifiedAt` | dateTime | null = email pas encore vérifié, set = vérifié à cette date |
+| `VerificationToken` | Single line text | token de vérification d'email actif (24h), null après usage |
+| `VerificationExpires` | dateTime | expiry du token de vérification |
+| `ResetToken` | Single line text | token de reset password actif (1h), null après usage |
+| `ResetExpires` | dateTime | expiry du token de reset |
+
+> **Migration des utilisateurs existants** : après ajout des 5 champs ci-dessus, les rows existantes ont `EmailVerifiedAt` à null et seraient considérées comme non-vérifiées. Pour basculer les seeds (admin, devs de test) en vérifiés, mettez `EmailVerifiedAt` au timestamp ISO de votre choix dans Airtable. Le gate sur les actions API n'est actif que si `REQUIRE_EMAIL_VERIFICATION=true` (cf. setup), donc vous pouvez introduire la migration progressivement.
 
 ### Table `Feedbacks`
 | Champ | Type | Notes |

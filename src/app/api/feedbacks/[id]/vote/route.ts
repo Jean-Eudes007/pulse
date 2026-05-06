@@ -17,7 +17,7 @@ export async function POST(request: Request, context: RouteContext) {
   const limited = await rateLimit(request, { name: "vote", max: 20, window: "1 m" });
   if (limited) return limited;
 
-  const auth = await requireAuth();
+  const auth = await requireAuth({ verified: true });
   if (auth.error) return auth.error;
   const { user } = auth;
 

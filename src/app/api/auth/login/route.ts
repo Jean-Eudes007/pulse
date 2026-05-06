@@ -33,7 +33,12 @@ export async function POST(request: Request) {
     );
   }
 
-  await setAuthCookie({ id: user.id, email: user.email, role: user.role });
+  await setAuthCookie({
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    emailVerifiedAt: user.emailVerifiedAt,
+  });
   revalidatePath("/", "layout");
 
   return NextResponse.json({

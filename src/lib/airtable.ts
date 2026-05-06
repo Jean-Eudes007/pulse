@@ -3,11 +3,17 @@
 // are located in lib/airtable/* split by domain (Q-2 audit refactor).
 export type { UserRecord } from "./airtable/users";
 export {
+  consumeResetToken,
   createUser,
   getUserByEmail,
   getUserById,
+  getUserByResetToken,
+  getUserByVerificationToken,
   getUsersByIds,
   listDevs,
+  markEmailVerified,
+  setResetToken,
+  setVerificationToken,
 } from "./airtable/users";
 
 export type { FeedbackRecord, FeedbackWithCreator } from "./airtable/feedbacks";

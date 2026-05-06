@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { Header } from "@/components/Header";
+import { VerificationBanner } from "@/components/VerificationBanner";
+import { getCurrentUser } from "@/lib/auth";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,11 +33,14 @@ try {
 } catch (_) {}
 `.trim();
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const user = await getCurrentUser();
+  const showVerificationBanner = Boolean(user && !user.emailVerifiedAt);
+
   return (
     <html
       lang="fr"
@@ -47,6 +52,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-bg-tertiary text-text-primary font-sans">
         <Header />
         <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
+          {showVerificationBanner && user && (
+            <VerificationBanner email={user.email} />
+          )}
           {children}
         </main>
         <Toaster position="bottom-right" richColors closeButton />

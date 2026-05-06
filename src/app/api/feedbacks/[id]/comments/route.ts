@@ -23,7 +23,7 @@ export async function GET(_request: Request, context: RouteContext) {
 }
 
 export async function POST(request: Request, context: RouteContext) {
-  const auth = await requireAuth();
+  const auth = await requireAuth({ verified: true });
   if (auth.error) return auth.error;
   const { user } = auth;
 
