@@ -72,6 +72,17 @@ export const createCommentSchema = z.object({
   body: z.string().min(1, "Le commentaire ne peut pas être vide").max(2000),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email().max(254),
+});
+
+export const resetPasswordSchema = z.object({
+  password: z
+    .string()
+    .min(10, "Mot de passe min. 10 caractères")
+    .max(128, "Mot de passe max. 128 caractères"),
+});
+
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateFeedbackInput = z.infer<typeof createFeedbackSchema>;

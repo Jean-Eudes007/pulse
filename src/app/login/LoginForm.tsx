@@ -91,15 +91,25 @@ export function LoginForm() {
         </button>
       </form>
 
-      <p className="text-center text-sm text-text-secondary mt-6">
-        Pas encore de compte ?{" "}
-        <Link
-          href="/signup"
-          className="text-text-primary font-medium hover:underline"
-        >
-          Inscription
-        </Link>
-      </p>
+      <div className="text-center text-sm text-text-secondary mt-6 space-y-2">
+        <p>
+          <Link
+            href="/forgot-password"
+            className="text-text-secondary hover:text-text-primary hover:underline"
+          >
+            Mot de passe oublié ?
+          </Link>
+        </p>
+        <p>
+          Pas encore de compte ?{" "}
+          <Link
+            href="/signup"
+            className="text-text-primary font-medium hover:underline"
+          >
+            Inscription
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
