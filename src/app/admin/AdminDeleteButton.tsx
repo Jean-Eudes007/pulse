@@ -1,26 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useApiMutation } from "@/lib/useApiMutation";
 
 export function AdminDeleteButton({ feedbackId }: { feedbackId: string }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
+  const { mutate, pending } = useApiMutation();
 
   async function handleClick() {
     if (!confirm("Supprimer ce feedback ?")) return;
-    setPending(true);
-    const res = await fetch(`/api/feedbacks/${feedbackId}`, {
-      method: "DELETE",
-    });
-    setPending(false);
-    if (!res.ok) {
-      toast.error("Erreur lors de la suppression");
-      return;
-    }
-    toast.success("Feedback supprimé");
-    router.refresh();
+    await mutate(
+      `/api/feedbacks/${feedbackId}`,
+      { method: "DELETE" },
+      {
+        successMessage: "Feedback supprimé",
+        errorMessage: "Erreur lors de la suppression",
+      },
+    );
   }
 
   return (

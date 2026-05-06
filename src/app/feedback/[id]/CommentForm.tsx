@@ -1,32 +1,21 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
+import { useApiMutation } from "@/lib/useApiMutation";
 
 export function CommentForm({ feedbackId }: { feedbackId: string }) {
-  const router = useRouter();
+  const { mutate, pending } = useApiMutation();
   const [body, setBody] = useState("");
-  const [pending, setPending] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!body.trim()) return;
-    setPending(true);
-    const res = await fetch(`/api/feedbacks/${feedbackId}/comments`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ body }),
-    });
-    setPending(false);
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      toast.error(data.error ?? "Erreur");
-      return;
-    }
-    setBody("");
-    toast.success("Commentaire ajouté");
-    router.refresh();
+    const res = await mutate(
+      `/api/feedbacks/${feedbackId}/comments`,
+      { method: "POST", json: { body } },
+      { successMessage: "Commentaire ajouté" },
+    );
+    if (res.ok) setBody("");
   }
 
   return (

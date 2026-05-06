@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 import { FEEDBACK_TYPES, type FeedbackType } from "@/lib/schemas";
+import { useApiMutation } from "@/lib/useApiMutation";
 
 const TYPE_LABELS: Record<FeedbackType, string> = {
   bug: "🐛 Bug",
@@ -13,11 +13,11 @@ const TYPE_LABELS: Record<FeedbackType, string> = {
 
 export default function SubmitPage() {
   const router = useRouter();
+  const { mutate, pending } = useApiMutation();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [type, setType] = useState<FeedbackType | "">("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,24 +26,19 @@ export default function SubmitPage() {
       return;
     }
     setError(null);
-    setPending(true);
-
-    const res = await fetch("/api/feedbacks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, type }),
-    });
-
-    setPending(false);
-
+    const res = await mutate(
+      "/api/feedbacks",
+      { method: "POST", json: { title, description, type } },
+      {
+        toastError: false,
+        successMessage: "Feedback créé",
+        errorMessage: "Erreur lors de la création",
+      },
+    );
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Erreur lors de la création");
+      setError(res.error);
       return;
     }
-
-    toast.success("Feedback créé");
-    router.refresh();
     router.push("/feedbacks");
   }
 

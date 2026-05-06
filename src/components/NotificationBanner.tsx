@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 import type { NotificationWithFeedback } from "@/lib/airtable";
 import type { NotificationKind } from "@/lib/schemas";
+import { useApiMutation } from "@/lib/useApiMutation";
 
 const STATUS_MESSAGE: Record<
   NotificationKind,
@@ -19,9 +18,8 @@ const STATUS_MESSAGE: Record<
 };
 
 export function NotificationBanner() {
-  const router = useRouter();
+  const { mutate, pending: dismissing } = useApiMutation();
   const [notifs, setNotifs] = useState<NotificationWithFeedback[] | null>(null);
-  const [dismissing, setDismissing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,15 +39,12 @@ export function NotificationBanner() {
   if (notifs === null || notifs.length === 0) return null;
 
   async function dismissAll() {
-    setDismissing(true);
-    const res = await fetch("/api/notifications", { method: "DELETE" });
-    setDismissing(false);
-    if (!res.ok) {
-      toast.error("Erreur");
-      return;
-    }
-    setNotifs([]);
-    router.refresh();
+    const res = await mutate(
+      "/api/notifications",
+      { method: "DELETE" },
+      { errorMessage: "Erreur" },
+    );
+    if (res.ok) setNotifs([]);
   }
 
   return (

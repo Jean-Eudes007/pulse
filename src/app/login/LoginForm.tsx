@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useApiMutation } from "@/lib/useApiMutation";
 
 export function LoginForm() {
   const search = useSearchParams();
@@ -14,30 +15,23 @@ export function LoginForm() {
       ? rawRedirect
       : "/feedbacks";
 
+  const { mutate, pending } = useApiMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    setPending(true);
-
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-
-    setPending(false);
-
+    const res = await mutate(
+      "/api/auth/login",
+      { method: "POST", json: { email, password } },
+      { toastError: false, refresh: false, errorMessage: "Erreur de connexion" },
+    );
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Erreur de connexion");
+      setError(res.error);
       return;
     }
-
     toast.success("Connexion réussie");
     // Full reload to refresh Server Components (Header) reading the new cookie
     window.location.href = redirectTo;

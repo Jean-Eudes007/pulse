@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
+import { useApiMutation } from "@/lib/useApiMutation";
 
 export function LogoutButton() {
-  const [pending, setPending] = useState(false);
+  const { mutate, pending } = useApiMutation();
 
   async function handleClick() {
-    setPending(true);
-    await fetch("/api/auth/logout", { method: "POST" });
-    toast.success("Déconnecté");
+    await mutate(
+      "/api/auth/logout",
+      { method: "POST" },
+      { successMessage: "Déconnecté", refresh: false },
+    );
+    // Full reload so server components re-render without the auth cookie
     window.location.href = "/";
   }
 

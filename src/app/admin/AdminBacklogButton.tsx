@@ -1,25 +1,19 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
+import { useApiMutation } from "@/lib/useApiMutation";
 
 export function AdminBacklogButton({ feedbackId }: { feedbackId: string }) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
+  const { mutate, pending } = useApiMutation();
 
   async function handleClick() {
-    setPending(true);
-    const res = await fetch(`/api/feedbacks/${feedbackId}/backlog`, {
-      method: "POST",
-    });
-    setPending(false);
-    if (!res.ok) {
-      toast.error("Erreur lors de l'envoi au backlog");
-      return;
-    }
-    toast.success("Envoyé au backlog");
-    router.refresh();
+    await mutate(
+      `/api/feedbacks/${feedbackId}/backlog`,
+      { method: "POST" },
+      {
+        successMessage: "Envoyé au backlog",
+        errorMessage: "Erreur lors de l'envoi au backlog",
+      },
+    );
   }
 
   return (

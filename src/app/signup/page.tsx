@@ -3,33 +3,27 @@
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useApiMutation } from "@/lib/useApiMutation";
 
 export default function SignupPage() {
+  const { mutate, pending } = useApiMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    setPending(true);
-
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, name }),
-    });
-
-    setPending(false);
-
+    const res = await mutate(
+      "/api/auth/signup",
+      { method: "POST", json: { email, password, name } },
+      { toastError: false, refresh: false, errorMessage: "Erreur d'inscription" },
+    );
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Erreur d'inscription");
+      setError(res.error);
       return;
     }
-
     toast.success("Bienvenue sur Pulse !");
     window.location.href = "/feedbacks";
   }
