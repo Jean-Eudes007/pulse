@@ -243,6 +243,27 @@ npm run dev
 ### 6. Créer un admin
 Après inscription via `/signup`, ouvrir Airtable → table `Users` → changer `Role` à `admin`. Re-login pour rafraîchir le JWT.
 
+### 6 bis. Comptes de test (base de dev)
+
+Seed data utilisée pour les démos et les tests E2E. Tous marqués `EmailVerifiedAt` non null donc le banner de vérification ne s'affiche pas pour eux.
+
+| Email | Role | Usage |
+|---|---|---|
+| `alice@test.com` | admin | Compte admin principal — accès au dashboard `/admin` (vue d'ensemble + liste/modération) |
+| `bob@test.com` | user | Compte user générique pour vérifier les permissions cross-user |
+| `prodtest@example.com` | user | Compte de test "réaliste" (domaine externe) |
+| `vgranouillit.pro@gmail.com` | user | Compte propriétaire |
+| `marc@pulse.app` | dev | Dev seed — assignations kanban |
+| `yasmine@pulse.app` | dev | Dev seed |
+| `lea@pulse.app` | dev | Dev seed |
+| `marie@pulse.app` | user | User seed — feedbacks fictifs |
+| `hugo@pulse.app` | user | User seed |
+| `tom@pulse.app` | user | User seed |
+| `sarah@pulse.app` | user | User seed |
+| `alex@pulse.app` | user | User seed |
+
+> **Comptes manquants ?** Les seeds `@pulse.app` sont fictifs : adresses non valides, emails de vérif/reset y seront loggés en console (pas envoyés). Pour tester un vrai flow Resend, utiliser une adresse réelle. Les mots de passe seed ne sont pas dans le repo — récupérables via password reset si Resend est configuré, ou en re-créant un user via `/signup`.
+
 ### 7. Déploiement Vercel
 1. `git push` sur GitHub
 2. [vercel.com/new](https://vercel.com/new) → Import → choisir le repo `pulse`
