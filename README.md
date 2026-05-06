@@ -473,11 +473,11 @@ Trame pour la présentation finale (formatrice + autres stagiaires, ~25 min tota
 
 | Partie | Durée | Pour qui ? |
 |---|---|---|
-| 1. La stack expliquée | ~9 min | Stagiaires (récit) + formatrice (maturité tech) |
+| 1. La stack expliquée | ~10 min | Stagiaires (récit) + formatrice (maturité tech) |
 | 2. Démo live (Bob / Alice / Yasmine) | 10 min max | Tout le monde |
 | 3. Q&A | 5 min | Tout le monde |
 
-### Partie 1 — La stack expliquée (9 min)
+### Partie 1 — La stack expliquée (10 min)
 
 Format pour chaque outil :
 1. *"X, c'est un [outil de]..."* — 1 phrase pour le non-tech
@@ -485,7 +485,7 @@ Format pour chaque outil :
 3. *"Dans Pulse, je m'en sers pour..."* — concret
 4. *"Sans ça, il aurait fallu..."* — optionnel, pour faire sentir la valeur
 
-Cinq blocs logiques, ~1.5 min chacun.
+Cinq blocs stack + un bloc sécurité, ~1.5 min chacun.
 
 #### Ouverture (30 s)
 > "La question que vous allez tous me poser : *mais concrètement, comment t'as fait pour coder ça ?* Je vais vous montrer chaque pièce de la machine, dans l'ordre où on les rencontre quand on construit un projet web moderne."
@@ -523,6 +523,17 @@ Trois services qui font chacun **une chose mieux que je ne saurais le faire** :
 - **Sentry** — détecteur d'erreurs en prod. Si une page plante, je reçois un email avec la cause + la ligne de code.
 
 Aparté formatrice : *tous gracieusement dégradés — sans clés d'API, l'app continue de tourner. Volontaire pour que le dev local reste simple.*
+
+#### 6. Sécurité — ce qui protège l'app (~1.5 min)
+
+> "Avec des comptes utilisateurs et des données privées en jeu, plusieurs couches sont indispensables."
+
+- **Mots de passe protégés** : chiffrés avec bcrypt, jamais stockés en clair, illisibles même pour moi.
+- **Sessions sécurisées** : cookie signé par le serveur, transmis en HTTPS, inaccessible au code de la page.
+- **Anti-bombardement** : login bloqué après 5 essais en 1 minute. Vote, signup et reset password aussi limités.
+- **Vérification + reset par email** : pas d'inscription avec une adresse fictive, liens à expiration et à usage unique.
+
+Aparté formatrice : *bcrypt cost 10, JWT HS256 + cookie httpOnly + sameSite=lax + secure, dummy bcrypt sur email inconnu (anti timing-attack), Upstash Redis sliding window, validation Zod sur toutes les bodies API, headers HTTP de sécurité (HSTS, X-Frame-Options), token Airtable jamais exposé côté client. Audit de code complet documenté dans le README — items identifiés et traités.*
 
 #### Atterrissage (30 s)
 > "Pour résumer : **GitHub** stocke le code, **Vercel** le met en ligne, **Next.js** fait tourner les pages, **Airtable** stocke les données, **Resend / Redis / Sentry** s'occupent des cas tordus. Tout ça gratuit, moderne, interconnecté."

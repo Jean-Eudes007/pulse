@@ -80,7 +80,7 @@ function titleH1(slide, title) {
   });
 }
 
-const TOTAL = 14;
+const TOTAL = 15;
 
 // ─── Slide 1 — Title ────────────────────────────────────────────────────
 {
@@ -672,7 +672,94 @@ pageNumber(
   pageNumber(s, 9, TOTAL);
 }
 
-// ─── Slide 10 — Récap stack ─────────────────────────────────────────────
+// ─── Slide 10 — Sécurité ────────────────────────────────────────────────
+{
+  const s = pres.addSlide();
+  s.background = { color: C.bgPaper };
+  tinyHeader(s, "SÉCURITÉ");
+  titleH1(s, "Ce qui protège l'app");
+
+  s.addText(
+    "Avec des comptes utilisateurs et des données privées en jeu, plusieurs couches sont indispensables.",
+    {
+      x: MARGIN,
+      y: 2.5,
+      w: W - 2 * MARGIN,
+      h: 0.7,
+      fontSize: 17,
+      fontFace: FONT_BODY,
+      color: C.muted,
+      italic: true,
+      margin: 0,
+    },
+  );
+
+  // 4 bullets, slightly tighter spacing than tool slides (0.7 vs 0.85)
+  const bullets = [
+    {
+      label: "Mots de passe protégés",
+      body: "chiffrés avec bcrypt, jamais stockés en clair, illisibles même pour moi.",
+    },
+    {
+      label: "Sessions sécurisées",
+      body: "cookie signé par le serveur, transmis en HTTPS, inaccessible au code de la page.",
+    },
+    {
+      label: "Anti-bombardement",
+      body: "login bloqué après 5 essais en 1 minute. Vote, signup et reset password aussi limités.",
+    },
+    {
+      label: "Vérification + reset par email",
+      body: "pas d'inscription avec une adresse fictive. Liens à expiration courte, à usage unique.",
+    },
+  ];
+  bullets.forEach((b, i) => {
+    const y = 3.55 + i * 0.7;
+    s.addShape(pres.shapes.RECTANGLE, {
+      x: MARGIN,
+      y,
+      w: 0.04,
+      h: 0.55,
+      fill: { color: C.ink },
+      line: { color: C.ink, width: 0 },
+    });
+    s.addText(
+      [
+        { text: b.label + " — ", options: { bold: true, color: C.ink } },
+        { text: b.body, options: { color: C.inkSoft } },
+      ],
+      {
+        x: MARGIN + 0.25,
+        y,
+        w: W - 2 * MARGIN - 0.25,
+        h: 0.6,
+        fontSize: 14,
+        fontFace: FONT_BODY,
+        valign: "middle",
+        margin: 0,
+      },
+    );
+  });
+
+  s.addText(
+    "Audit complet du code documenté dans le README — items identifiés, traités, justifiés.",
+    {
+      x: MARGIN,
+      y: H - 1.0,
+      w: W - 2 * MARGIN,
+      h: 0.4,
+      fontSize: 12,
+      fontFace: FONT_BODY,
+      color: C.mutedLight,
+      italic: true,
+      margin: 0,
+    },
+  );
+
+  pageNumber(s, 10, TOTAL);
+}
+
+// ─── Slide 11 — Récap stack ─────────────────────────────────────────────
 {
   const s = pres.addSlide();
   s.background = { color: C.bgPaper };
@@ -716,10 +803,10 @@ pageNumber(
     margin: 0,
   });
 
-  pageNumber(s, 10, TOTAL);
+  pageNumber(s, 11, TOTAL);
 }
 
-// ─── Slide 11 — Section break: Partie 2 ─────────────────────────────────
+// ─── Slide 12 — Section break: Partie 2 ─────────────────────────────────
 {
   const s = pres.addSlide();
   s.background = { color: C.ink };
@@ -885,10 +972,10 @@ pageNumber(
     },
   );
 
-  pageNumber(s, 12, TOTAL);
+  pageNumber(s, 13, TOTAL);
 }
 
-// ─── Slide 13 — Closing : ce que j'ai appris ────────────────────────────
+// ─── Slide 14 — Closing : ce que j'ai appris ────────────────────────────
 {
   const s = pres.addSlide();
   s.background = { color: C.bgPaper };
@@ -982,10 +1069,10 @@ pageNumber(
     margin: 0,
   });
 
-  pageNumber(s, 13, TOTAL);
+  pageNumber(s, 14, TOTAL);
 }
 
-// ─── Slide 14 — Q&A ─────────────────────────────────────────────────────
+// ─── Slide 15 — Q&A ─────────────────────────────────────────────────────
 {
   const s = pres.addSlide();
   s.background = { color: C.bgPaper };
