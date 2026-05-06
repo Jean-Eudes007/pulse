@@ -9,7 +9,6 @@ import {
   type DragEndEvent,
   type DragStartEvent,
 } from "@dnd-kit/core";
-import confetti from "canvas-confetti";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -24,8 +23,10 @@ import { DragPreview } from "./KanbanCard";
 import { DroppableColumn } from "./KanbanColumn";
 import { COLUMN_LABELS, type DevLite } from "./kanban-types";
 
-function celebrate() {
-  // Two bursts from the bottom corners
+// Lazy-load canvas-confetti — only fetched (~6KB) when a dev actually
+// finishes a ticket. Most users never trigger this.
+async function celebrate() {
+  const { default: confetti } = await import("canvas-confetti");
   const opts = { spread: 70, ticks: 200, gravity: 1, scalar: 0.9 };
   confetti({ ...opts, particleCount: 80, origin: { x: 0.2, y: 0.85 }, angle: 60 });
   confetti({ ...opts, particleCount: 80, origin: { x: 0.8, y: 0.85 }, angle: 120 });

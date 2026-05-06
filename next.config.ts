@@ -1,3 +1,4 @@
+import bundleAnalyzer from "@next/bundle-analyzer";
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
@@ -32,11 +33,17 @@ const nextConfig: NextConfig = {
   },
 };
 
+// Bundle analyzer: run with ANALYZE=true npm run build to open the
+// interactive bundle visualizer in the browser.
+const withBundleAnalyzer = bundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
 // withSentryConfig wraps the Next config to enable source map upload to
 // Sentry at build time. Without SENTRY_AUTH_TOKEN it stays silent and
 // only the runtime SDK works (still useful for capturing errors with
 // minified stack traces).
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
   silent: !process.env.SENTRY_AUTH_TOKEN,
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
