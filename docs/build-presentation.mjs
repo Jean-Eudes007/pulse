@@ -255,73 +255,122 @@ const TOTAL = 14;
 }
 
 // ─── Slide 4 — Architecture diagram ─────────────────────────────────────
+// Layout: Vercel is the hub (centered, dark). Inputs feed in from
+// above (Browser) and from the left (GitHub → GitHub Actions). Vercel
+// fans out below to the 4 satellite services.
 {
   const s = pres.addSlide();
   s.background = { color: C.bgPaper };
   tinyHeader(s, "VUE D'ENSEMBLE");
   titleH1(s, "Comment tout s'emboîte");
 
-  // Top: browser
-  const browserX = (W - 3.6) / 2;
-  s.addShape(pres.shapes.RECTANGLE, {
-    x: browserX,
-    y: 2.6,
-    w: 3.6,
-    h: 0.8,
-    fill: { color: C.bgSoft },
-    line: { color: C.border, width: 1 },
-  });
-  s.addText("Navigateur", {
-    x: browserX,
-    y: 2.62,
-    w: 3.6,
-    h: 0.36,
-    fontSize: 13,
-    fontFace: FONT_BODY,
-    color: C.ink,
-    bold: true,
-    align: "center",
-    valign: "bottom",
-    margin: 0,
-  });
-  s.addText("Bob · Alice · Yasmine", {
-    x: browserX,
-    y: 2.98,
-    w: 3.6,
-    h: 0.36,
-    fontSize: 10,
-    fontFace: FONT_BODY,
-    color: C.muted,
-    align: "center",
-    valign: "top",
-    margin: 0,
-  });
+  // Helper: 2-line labelled box (used for every node except Vercel)
+  function nodeBox(x, y, w, h, top, sub, opts = {}) {
+    s.addShape(pres.shapes.RECTANGLE, {
+      x,
+      y,
+      w,
+      h,
+      fill: { color: opts.fill ?? C.bgSoft },
+      line: { color: opts.borderColor ?? C.border, width: 1 },
+    });
+    s.addText(top, {
+      x,
+      y: y + 0.1,
+      w,
+      h: h * 0.45,
+      fontSize: 13,
+      fontFace: FONT_BODY,
+      color: C.ink,
+      bold: true,
+      align: "center",
+      valign: "bottom",
+      margin: 0,
+    });
+    s.addText(sub, {
+      x,
+      y: y + h * 0.5,
+      w,
+      h: h * 0.45,
+      fontSize: 10,
+      fontFace: FONT_BODY,
+      color: C.muted,
+      align: "center",
+      valign: "top",
+      margin: 0,
+    });
+  }
 
-  // Vertical arrow
+  // ── Top: Browser ──
+  const browserW = 3.4;
+  const browserX = (W - browserW) / 2;
+  const browserY = 2.6;
+  const browserH = 0.85;
+  nodeBox(browserX, browserY, browserW, browserH, "Navigateur", "Bob · Alice · Yasmine");
+
+  // Arrow Browser ↓ Vercel
   s.addShape(pres.shapes.LINE, {
     x: W / 2,
-    y: 3.45,
+    y: browserY + browserH,
     w: 0,
     h: 0.45,
     line: { color: C.muted, width: 1 },
   });
 
-  // Middle: Vercel
-  const vercelX = (W - 4.6) / 2;
+  // ── Middle row: GitHub → Actions → Vercel (Vercel = hub, dark) ──
+  const midY = 3.95;
+  const vercelW = 3.4;
+  const vercelH = 1.1;
+  const vercelX = (W - vercelW) / 2;
+  const flowH = 0.85;
+  // Vertical center of the row, used to align horizontal arrows
+  const flowCenterY = midY + flowH / 2 + 0.075; // slight nudge to align with Vercel center
+  // GitHub box: x=0.7
+  const ghX = 0.7;
+  const ghW = 1.65;
+  // Actions box: between GitHub and Vercel
+  const actX = 2.7;
+  const actW = 1.85;
+
+  // GitHub
+  nodeBox(ghX, midY + 0.075, ghW, flowH, "GitHub", "Code + historique");
+
+  // Arrow GitHub → Actions
+  s.addShape(pres.shapes.LINE, {
+    x: ghX + ghW,
+    y: flowCenterY,
+    w: actX - (ghX + ghW),
+    h: 0,
+    line: { color: C.muted, width: 1 },
+  });
+
+  // GitHub Actions
+  nodeBox(actX, midY + 0.075, actW, flowH, "GitHub Actions", "Vérifications auto");
+
+  // Arrow Actions → Vercel
+  s.addShape(pres.shapes.LINE, {
+    x: actX + actW,
+    y: flowCenterY,
+    w: vercelX - (actX + actW),
+    h: 0,
+    line: { color: C.muted, width: 1 },
+  });
+
+  // Vercel (the hub) — dark, taller
   s.addShape(pres.shapes.RECTANGLE, {
     x: vercelX,
-    y: 3.95,
-    w: 4.6,
-    h: 1.0,
+    y: midY,
+    w: vercelW,
+    h: vercelH,
     fill: { color: C.ink },
     line: { color: C.ink, width: 0 },
   });
   s.addText("Vercel", {
     x: vercelX,
-    y: 4.0,
-    w: 4.6,
+    y: midY + 0.18,
+    w: vercelW,
     h: 0.4,
-    fontSize: 16,
+    fontSize: 17,
     fontFace: FONT_BODY,
     color: "FFFFFF",
     bold: true,
@@ -331,8 +380,8 @@ const TOTAL = 14;
   });
   s.addText("Site en ligne · Next.js + TypeScript", {
     x: vercelX,
-    y: 4.45,
-    w: 4.6,
+    y: midY + 0.6,
+    w: vercelW,
     h: 0.4,
     fontSize: 11,
     fontFace: FONT_BODY,
@@ -342,8 +391,18 @@ const TOTAL = 14;
     margin: 0,
   });
 
-  // Service boxes (4 wide)
-  const servicesY = 5.8;
+  // Arrow Vercel ↓ services
+  const arrowDownY = midY + vercelH;
+  s.addShape(pres.shapes.LINE, {
+    x: W / 2,
+    y: arrowDownY,
+    w: 0,
+    h: 0.45,
+    line: { color: C.muted, width: 1 },
+  });
+
+  // ── Bottom: 4 satellite services ──
+  const servicesY = arrowDownY + 0.55;
   const services = [
     { t: "Airtable", s: "Données" },
     { t: "Resend", s: "Emails" },
@@ -356,69 +415,7 @@ const TOTAL = 14;
   const startX = (W - totalW) / 2;
   services.forEach((srv, i) => {
     const x = startX + i * (boxW + gap);
-    s.addShape(pres.shapes.RECTANGLE, {
-      x,
-      y: servicesY,
-      w: boxW,
-      h: 0.95,
-      fill: { color: C.bgSoft },
-      line: { color: C.border, width: 1 },
-    });
-    s.addText(srv.t, {
-      x,
-      y: servicesY + 0.08,
-      w: boxW,
-      h: 0.35,
-      fontSize: 13,
-      fontFace: FONT_BODY,
-      color: C.ink,
-      bold: true,
-      align: "center",
-      margin: 0,
-    });
-    s.addText(srv.s, {
-      x,
-      y: servicesY + 0.48,
-      w: boxW,
-      h: 0.35,
-      fontSize: 10,
-      fontFace: FONT_BODY,
-      color: C.muted,
-      align: "center",
-      margin: 0,
-    });
-  });
-
-  // Vercel ↓ services arrow
-  s.addShape(pres.shapes.LINE, {
-    x: W / 2,
-    y: 5.0,
-    w: 0,
-    h: 0.7,
-    line: { color: C.muted, width: 1 },
-  });
-
-  // Side: GitHub flow
-  s.addText("GitHub  →  GitHub Actions", {
-    x: MARGIN,
-    y: H - 1.0,
-    w: 6,
-    h: 0.35,
-    fontSize: 11,
-    fontFace: FONT_BODY,
-    color: C.muted,
-    italic: true,
-    margin: 0,
-  });
-  s.addText("Code + historique  →  vérifications auto à chaque commit", {
-    x: MARGIN,
-    y: H - 0.7,
-    w: 8,
-    h: 0.35,
-    fontSize: 10,
-    fontFace: FONT_BODY,
-    color: C.mutedLight,
-    margin: 0,
+    nodeBox(x, servicesY, boxW, 0.85, srv.t, srv.s);
   });
 
   pageNumber(s, 4, TOTAL);
