@@ -1,0 +1,13 @@
+{
+  "name": "pulse-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Generators for the Pulse final-presentation deck.",
+  "type": "module",
+  "scripts": {
+    "build": "node build-presentation.mjs"
+  },
+  "dependencies": {
+    "pptxgenjs": "^4.0.1"
+  }
+}

@@ -465,6 +465,148 @@ Organisée par effort × impact. Les tiers sont indépendants — vous pouvez pi
 
 ---
 
+## Présentation projet
+
+Trame pour la présentation finale (formatrice + autres stagiaires, ~25 min total). Public principal **non-tech**, avec une formatrice dev pour les apartés techniques.
+
+### Format
+
+| Partie | Durée | Pour qui ? |
+|---|---|---|
+| 1. La stack expliquée | ~9 min | Stagiaires (récit) + formatrice (maturité tech) |
+| 2. Démo live (Bob / Alice / Yasmine) | 10 min max | Tout le monde |
+| 3. Q&A | 5 min | Tout le monde |
+
+### Partie 1 — La stack expliquée (9 min)
+
+Format pour chaque outil :
+1. *"X, c'est un [outil de]..."* — 1 phrase pour le non-tech
+2. *[Aparté formatrice : un détail technique précis]* — court
+3. *"Dans Pulse, je m'en sers pour..."* — concret
+4. *"Sans ça, il aurait fallu..."* — optionnel, pour faire sentir la valeur
+
+Cinq blocs logiques, ~1.5 min chacun.
+
+#### Ouverture (30 s)
+> "La question que vous allez tous me poser : *mais concrètement, comment t'as fait pour coder ça ?* Je vais vous montrer chaque pièce de la machine, dans l'ordre où on les rencontre quand on construit un projet web moderne."
+
+#### 1. Le code de l'app — Next.js + TypeScript + Tailwind (~1.5 min)
+- **Next.js** : un *framework*, un squelette pré-construit qui s'occupe des trucs chiants (URLs, rendu des pages, communication base de données). Aparté formatrice : *Next.js 16, App Router, React Server Components.*
+- **TypeScript** : du JavaScript avec un correcteur orthographique pour les bugs. M'a évité des dizaines d'erreurs idiotes.
+- **Tailwind CSS** : la mise en forme (couleurs, espacement, mode sombre) écrite directement dans le code.
+
+> **Sans ces 3 outils** : framework maison, code sans filet, du temps perdu sur des bugs visuels. Gain : ~2 jours.
+
+#### 2. GitHub (~1.5 min)
+- C'est l'endroit où vit le code. Imaginez une **Google Docs pour le code**, avec une mémoire infinie. Si je casse un truc, je remonte dans le temps en 2 clics.
+- Aparté formatrice : *git workflow classique, branch main, 60+ commits scopés, repo public.*
+- Dans Pulse, GitHub me sert à : (1) sauvegarder, (2) garder l'historique, (3) déclencher **GitHub Actions** — un robot qui vérifie à chaque commit que le code compile + respecte les règles + ne casse rien. Vert ou rouge en 1 minute.
+
+#### 3. Vercel (~1.5 min)
+- C'est l'endroit où l'app est **en ligne**. Pas de serveur à configurer, pas de HTTPS à gérer, pas de mise en prod manuelle.
+- Aparté formatrice : *Vercel = éditeur de Next.js, hébergement serverless, déploiement git-based, preview URLs par PR, free tier suffisant.*
+- Le truc magique : **git push → 30 secondes → site mis à jour en ligne**.
+
+> **Sans ça** : louer un serveur, configurer SSL, mettre en place un CI/CD = un week-end de plomberie.
+
+#### 4. Airtable (~1.5 min)
+- La base de données. Pour faire simple, **un Excel collaboratif en ligne** branché à mon app.
+- Aparté formatrice : *choix pédagogique, pas de migrations SQL pendant la formation, UI pour debug, free tier suffit. Limites assumées (5 req/s, pas de transactions) → plan de migration Postgres en V3 documenté.*
+- 5 tables : Users, Feedbacks, Votes, Notifications, Comments. Je peux ouvrir Airtable directement pour debug.
+
+#### 5. Les services satellites — Resend, Redis, Sentry (~1.5 min)
+
+Trois services qui font chacun **une chose mieux que je ne saurais le faire** :
+
+- **Resend** — envoi d'emails (vérification compte + reset password). Gère délivrabilité + spam folder + serveurs SMTP à ma place.
+- **Upstash Redis** — anti-spam. Bloque après 5 essais de login en moins d'une minute. Invisible pour les vrais users, brutal pour les attaquants.
+- **Sentry** — détecteur d'erreurs en prod. Si une page plante, je reçois un email avec la cause + la ligne de code.
+
+Aparté formatrice : *tous gracieusement dégradés — sans clés d'API, l'app continue de tourner. Volontaire pour que le dev local reste simple.*
+
+#### Atterrissage (30 s)
+> "Pour résumer : **GitHub** stocke le code, **Vercel** le met en ligne, **Next.js** fait tourner les pages, **Airtable** stocke les données, **Resend / Redis / Sentry** s'occupent des cas tordus. Tout ça gratuit, moderne, interconnecté."
+
+### Slide d'appui (architecture)
+
+```
+                      ┌─────────────────────┐
+                      │     Navigateur      │
+                      │  (Bob, Alice, ...)  │
+                      └──────────┬──────────┘
+                                 │
+                      ┌──────────▼──────────┐
+                      │       Vercel        │
+                      │   (site en ligne)   │
+                      │   ↑ Next.js + TS    │
+                      └──┬───────────────┬──┘
+                         │               │
+        ┌────────────────┘               └──────────────┐
+        │                                                │
+┌───────▼──────┐  ┌──────────────┐  ┌────────────┐  ┌───▼──────┐
+│   Airtable   │  │    Resend    │  │   Redis    │  │  Sentry  │
+│  (données)   │  │   (emails)   │  │ (anti-spam)│  │ (erreurs)│
+└──────────────┘  └──────────────┘  └────────────┘  └──────────┘
+
+┌─────────────┐    ┌──────────────────┐
+│   GitHub    │ ─► │  GitHub Actions  │  → vérifications auto
+│ (code + 📚) │    │  (le robot CI)   │
+└─────────────┘
+```
+
+### Partie 2 — Démo live (10 min)
+
+**Setup avant la démo** : 3 onglets Chrome ouverts, déjà loggés, à ne pas fermer (cookie JWT vit 7 jours).
+
+| Onglet | Compte | URL de départ |
+|---|---|---|
+| 1 | bob@test.com | `/feedbacks` |
+| 2 | alice@test.com | `/admin` |
+| 3 | yasmine@pulse.app | `/dev` |
+
+#### Acte 1 — Bob soumet (~1.5 min)
+- Click "Soumettre" → titre `Mode sombre`, type `Idée`, description "L'app me brûle les yeux la nuit"
+- Submit → toast → retour sur `/feedbacks`
+- **Punchline** : tenter de voter pour son propre feedback → bloqué. "Pas de spam possible."
+
+#### Acte 2 — Bob vote ailleurs (~1 min)
+- Click sur un autre feedback existant → vote → ⭐+1
+- "Un user, un vote par feedback. Simple, juste, scalable."
+
+#### Acte 3 — Alice voit le tableau de bord (~3 min)
+- L'onglet ouvre direct sur `/admin` (vue d'ensemble, KPIs + charts)
+- Pointer 3 trucs rapidement : compteurs, chart "répartition par type", top 5 par votes
+- Click onglet "Liste & modération" → bouton 📌 sur le mode sombre → toast
+- "Pulse a notifié Bob automatiquement, on le verra à la fin."
+
+#### Acte 4 — Yasmine prend le ticket (~3 min)
+- Refresh `/dev` → mode sombre dans "À faire", non assigné
+- **Drag-drop** vers "En cours" → assignation auto à Yasmine
+- Drag vers "Review" → drag vers "Livré" → 🎉 confetti
+- 2 secondes de pause silencieuse pour laisser l'effet retomber
+
+#### Acte 5 — La boucle se ferme (~1 min)
+- Onglet Bob, refresh
+- Bannière notification jaune : "🔔 ton feedback Mode sombre est livré"
+- Click → page détail, statut "Livré"
+- "Boucle complète : feedback → vote → priorisation → dev → notification."
+
+### Pièges à éviter
+- **Tester la démo 2x en chrono complet** avant le jour J
+- **Pas de code à l'écran**. Au pire, l'arborescence des fichiers 5 secondes
+- **Pas de "j'ai pas eu le temps de"**. Reformuler en "c'est dans le backlog V3, voici pourquoi j'ai priorisé X"
+- **Drag-drop** : mouvement franc (>6px) sinon ne déclenche pas. Boutons fallback dispo en plan B
+- **Refresh Bob à la fin** : pas trop tôt, sinon notif pas encore arrivée
+
+### Optionnel — la pièce IA
+Si tu veux jouer transparent (et probablement déclencher LE plus de questions stagiaires), 1 min après la stack :
+
+> "**Claude Code** — un assistant IA qui m'a aidé à coder. Je décrivais ce que je voulais, il proposait, je relisais, je validais. Je suis resté décideur (archi, sécurité, UX). Sans IA, ~3x plus de temps. Avec, je me suis concentré sur les décisions plutôt que la frappe au clavier."
+
+À assumer ou pas selon l'ambiance promo. "L'IA a tout fait" = mauvais signal. "J'ai dirigé l'IA" = bon signal.
+
+---
+
 ## Limitations connues
 
 1. **Cohérence éventuelle sur `VoteCount`** — les 2 requêtes Airtable (`createVote` + `incrementVoteCount`) ne sont pas atomiques. Si la 2ᵉ échoue après la 1ʳᵉ, le compteur diverge. Acceptable au volume actuel (~10 utilisateurs), à durcir avec une vraie DB transactionnelle.
