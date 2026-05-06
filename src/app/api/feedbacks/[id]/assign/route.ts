@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   assignFeedback,
@@ -46,6 +46,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   await assignFeedback(id, targetUserId);
+  revalidateTag("feedbacks", "max");
   revalidatePath("/dev");
   return NextResponse.json({ ok: true, assignedToId: targetUserId });
 }

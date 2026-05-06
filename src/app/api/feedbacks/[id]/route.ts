@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   deleteFeedback,
@@ -42,6 +43,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (parsed.error) return parsed.error;
 
   const updated = await updateFeedback(id, parsed.data);
+  revalidateTag("feedbacks", "max");
   return NextResponse.json({ feedback: updated });
 }
 
@@ -63,5 +65,6 @@ export async function DELETE(_request: Request, context: RouteContext) {
   }
 
   await deleteFeedback(id);
+  revalidateTag("feedbacks", "max");
   return NextResponse.json({ ok: true });
 }

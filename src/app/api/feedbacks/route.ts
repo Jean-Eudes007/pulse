@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { createFeedback, listFeedbacks } from "@/lib/airtable";
 import { parseJsonBody, requireAuth } from "@/lib/api-helpers";
@@ -23,6 +24,7 @@ export async function POST(request: Request) {
     ...parsed.data,
     creatorId: user.id,
   });
+  revalidateTag("feedbacks", "max");
 
   return NextResponse.json({ feedback }, { status: 201 });
 }

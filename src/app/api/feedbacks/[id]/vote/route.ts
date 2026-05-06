@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   createVote,
@@ -39,6 +40,7 @@ export async function POST(request: Request, context: RouteContext) {
 
   await createVote({ feedbackId: id, userId: user.id });
   await incrementVoteCount(id, feedback.voteCount);
+  revalidateTag("feedbacks", "max");
 
   return NextResponse.json({ voteCount: feedback.voteCount + 1 });
 }

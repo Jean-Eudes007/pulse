@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import {
   deleteNotificationForFeedback,
@@ -37,6 +37,7 @@ export async function POST(_request: Request, context: RouteContext) {
     });
   }
 
+  revalidateTag("feedbacks", "max");
   revalidatePath("/feedbacks");
   revalidatePath("/admin");
   revalidatePath("/dev");
@@ -62,6 +63,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     await deleteNotificationForFeedback(feedback.creatorId, id);
   }
 
+  revalidateTag("feedbacks", "max");
   revalidatePath("/feedbacks");
   revalidatePath("/admin");
   revalidatePath("/dev");

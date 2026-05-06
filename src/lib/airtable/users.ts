@@ -1,6 +1,11 @@
+import { unstable_cache } from "next/cache";
 import type { Role } from "../auth";
 import { AIRTABLE_PAGE_SIZE } from "../config";
 import { type AirtableRecord, nowIso, usersTable } from "./client";
+
+// listDevs is hit on every kanban render to populate the assign dropdown.
+// Devs are upgraded manually in Airtable so the list rarely changes —
+// 5-minute TTL is plenty fresh for the kanban use case.
 
 export type UserRecord = {
   id: string;
@@ -74,9 +79,16 @@ export async function createUser(input: {
   return mapUser(created[0]);
 }
 
-export async function listDevs(): Promise<UserRecord[]> {
-  const records = await usersTable
-    .select({ filterByFormula: `{Role} = 'dev'`, pageSize: AIRTABLE_PAGE_SIZE })
-    .all();
-  return records.map(mapUser);
-}
+export const listDevs = unstable_cache(
+  async function listDevs(): Promise<UserRecord[]> {
+    const records = await usersTable
+      .select({
+        filterByFormula: `{Role} = 'dev'`,
+        pageSize: AIRTABLE_PAGE_SIZE,
+      })
+      .all();
+    return records.map(mapUser);
+  },
+  ["devs-list"],
+  { tags: ["devs"], revalidate: 300 },
+);

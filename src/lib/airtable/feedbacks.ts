@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { AIRTABLE_PAGE_SIZE } from "../config";
 import type { FeedbackStatus, FeedbackType } from "../schemas";
 import {
@@ -7,6 +8,12 @@ import {
   nowIso,
 } from "./client";
 import { getUsersByIds } from "./users";
+
+// P-4 audit: cache the heavy list reads so /feedbacks, /admin and /dev
+// don't refetch from Airtable on every navigation. Pages stay dynamic
+// (Header reads cookies()) but the data fetches are deduplicated across
+// requests until a mutation calls revalidateTag("feedbacks").
+const FEEDBACKS_TAG = "feedbacks";
 
 export type FeedbackRecord = {
   id: string;
@@ -59,16 +66,20 @@ export async function enrichWithUsers(
   }));
 }
 
-export async function listFeedbacks(): Promise<FeedbackWithCreator[]> {
-  const records = await feedbacksTable
-    .select({
-      sort: [{ field: "VoteCount", direction: "desc" }],
-      pageSize: AIRTABLE_PAGE_SIZE,
-    })
-    .all();
-  const feedbacks = records.map(mapFeedback);
-  return enrichWithUsers(feedbacks);
-}
+export const listFeedbacks = unstable_cache(
+  async function listFeedbacks(): Promise<FeedbackWithCreator[]> {
+    const records = await feedbacksTable
+      .select({
+        sort: [{ field: "VoteCount", direction: "desc" }],
+        pageSize: AIRTABLE_PAGE_SIZE,
+      })
+      .all();
+    const feedbacks = records.map(mapFeedback);
+    return enrichWithUsers(feedbacks);
+  },
+  ["feedbacks-list"],
+  { tags: [FEEDBACKS_TAG] },
+);
 
 export async function getFeedbackById(
   id: string,
@@ -129,17 +140,21 @@ export async function incrementVoteCount(
   await feedbacksTable.update([{ id, fields: { VoteCount: current + 1 } }]);
 }
 
-export async function listBacklogFeedbacks(): Promise<FeedbackWithCreator[]> {
-  const records = await feedbacksTable
-    .select({
-      filterByFormula: `{Status} != ''`,
-      sort: [{ field: "VoteCount", direction: "desc" }],
-      pageSize: AIRTABLE_PAGE_SIZE,
-    })
-    .all();
-  const feedbacks = records.map(mapFeedback);
-  return enrichWithUsers(feedbacks);
-}
+export const listBacklogFeedbacks = unstable_cache(
+  async function listBacklogFeedbacks(): Promise<FeedbackWithCreator[]> {
+    const records = await feedbacksTable
+      .select({
+        filterByFormula: `{Status} != ''`,
+        sort: [{ field: "VoteCount", direction: "desc" }],
+        pageSize: AIRTABLE_PAGE_SIZE,
+      })
+      .all();
+    const feedbacks = records.map(mapFeedback);
+    return enrichWithUsers(feedbacks);
+  },
+  ["feedbacks-backlog"],
+  { tags: [FEEDBACKS_TAG] },
+);
 
 // Airtable accepts null to clear a field but the SDK FieldSet type
 // doesn't include null. Cast via `as unknown as Partial<FieldSet>` is
