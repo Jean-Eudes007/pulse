@@ -5,13 +5,17 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { NotificationWithFeedback } from "@/lib/airtable";
-import type { FeedbackStatus } from "@/lib/schemas";
+import type { NotificationKind } from "@/lib/schemas";
 
-const STATUS_MESSAGE: Record<FeedbackStatus, (assignee: string | null) => string> = {
+const STATUS_MESSAGE: Record<
+  NotificationKind,
+  (assignee: string | null) => string
+> = {
   to_do: () => "📌 envoyé au backlog",
   in_progress: (a) => (a ? `👋 pris par ${a}` : "👋 ticket pris"),
   review: () => "🔍 attend une relecture",
   done: () => "✅ livré !",
+  comment: () => "💬 nouveau commentaire",
 };
 
 export function NotificationBanner() {

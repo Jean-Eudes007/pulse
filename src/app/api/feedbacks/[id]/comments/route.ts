@@ -5,6 +5,7 @@ import {
   createComment,
   getFeedbackById,
   listComments,
+  upsertNotification,
 } from "@/lib/airtable";
 import { getCurrentUser } from "@/lib/auth";
 import { createCommentSchema } from "@/lib/schemas";
@@ -59,7 +60,17 @@ export async function POST(request: Request, context: RouteContext) {
     body: parsed.data.body,
   });
 
+  // Notify the feedback creator (skip if commenter IS the creator)
+  if (feedback.creatorId && feedback.creatorId !== user.id) {
+    await upsertNotification({
+      recipientId: feedback.creatorId,
+      feedbackId: id,
+      status: "comment",
+    });
+  }
+
   revalidatePath(`/feedback/${id}`);
+  revalidatePath("/feedbacks");
 
   return NextResponse.json({ comment }, { status: 201 });
 }

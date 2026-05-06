@@ -21,12 +21,14 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"] },
     },
   ],
-  // When run locally, Playwright will spin up `npm run dev` for us.
-  // In CI we'd typically point at a deployed preview URL.
+  // Playwright handles the dev server lifecycle in both local and CI:
+  // - local: `npm run dev` for HMR comfort
+  // - CI: `npm run start` against a built bundle (closer to prod)
+  // - if PLAYWRIGHT_BASE_URL is set, skip — test against an external URL
   webServer: process.env.PLAYWRIGHT_BASE_URL
     ? undefined
     : {
-        command: "npm run dev",
+        command: process.env.CI ? "npm run start" : "npm run dev",
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,

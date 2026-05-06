@@ -1,6 +1,10 @@
 import Airtable, { type FieldSet, type Records } from "airtable";
 import type { Role } from "./auth";
-import type { FeedbackStatus, FeedbackType } from "./schemas";
+import type {
+  FeedbackStatus,
+  FeedbackType,
+  NotificationKind,
+} from "./schemas";
 
 function getEnv(name: string): string {
   const v = process.env[name];
@@ -332,7 +336,7 @@ export type NotificationRecord = {
   id: string;
   recipientId: string | null;
   feedbackId: string | null;
-  status: FeedbackStatus | null;
+  status: NotificationKind | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -349,7 +353,7 @@ function mapNotification(r: AirtableRecord): NotificationRecord {
     id: r.id,
     recipientId: recipientIds[0] ?? null,
     feedbackId: feedbackIds[0] ?? null,
-    status: (f.Status as FeedbackStatus | undefined) ?? null,
+    status: (f.Status as NotificationKind | undefined) ?? null,
     createdAt: String(f.CreatedAt ?? ""),
     updatedAt: String(f.UpdatedAt ?? ""),
   };
@@ -391,7 +395,7 @@ export async function listNotifications(
 export async function upsertNotification(input: {
   recipientId: string;
   feedbackId: string;
-  status: FeedbackStatus;
+  status: NotificationKind;
 }): Promise<void> {
   const existing = await notificationsTable
     .select({

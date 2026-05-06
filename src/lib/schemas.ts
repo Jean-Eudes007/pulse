@@ -12,6 +12,16 @@ export const FEEDBACK_STATUSES = [
 ] as const;
 export type FeedbackStatus = (typeof FEEDBACK_STATUSES)[number];
 
+// What can land in a Notification.status field. Reuses FeedbackStatus
+// values for status-change notifications, plus "comment" when someone
+// posts a comment on the feedback. Single notif per (recipient,
+// feedback), latest event wins.
+export const NOTIFICATION_KINDS = [
+  ...FEEDBACK_STATUSES,
+  "comment",
+] as const;
+export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
+
 // Allowed transitions enforced server-side
 export const STATUS_TRANSITIONS: Record<
   FeedbackStatus,

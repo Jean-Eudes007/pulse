@@ -247,6 +247,31 @@ Après inscription via `/signup`, ouvrir Airtable → table `Users` → changer 
 
 **Recommandé** : créer 2 bases Airtable séparées (`Pulse-Dev` et `Pulse-Prod`) pour ne pas polluer la prod avec de la data de test. Chaque environnement Vercel pointe sur sa base.
 
+### 8. Tests E2E en CI (optionnel)
+
+Le workflow `e2e` dans GitHub Actions exécute les 10 tests Playwright sur chaque push. Il est **opt-in** : tant qu'il n'est pas activé, le workflow CI tourne en `Typecheck · Lint · Build` seulement.
+
+**Pour l'activer** :
+
+1. **Créer une base Airtable de test isolée** :
+   - airtable.com → Create base → la nommer `Pulse-Test`
+   - Cloner manuellement le schéma de prod (5 tables : Users, Feedbacks, Votes, Notifications, Comments). Ou via [airtable.com/sync-data](https://airtable.com/sync-data).
+   - Créer les 4 comptes de test : `alice@test.com` (admin), `bob@test.com` (user), `sarah@pulse.app` (user), `lea@pulse.app` (dev) — tous avec password `password123` (les tests les utilisent).
+   - Récupérer le `Base ID` (commence par `app...`)
+   - Créer un Personal Access Token dédié avec accès à cette base seulement.
+
+2. **GitHub → Settings → Secrets and variables → Actions** :
+   - Onglet **Secrets** : ajouter
+     - `E2E_AIRTABLE_TOKEN` (le PAT de la base test)
+     - `E2E_AIRTABLE_BASE_ID` (l'ID `app...` de la base test)
+     - `E2E_JWT_SECRET` (n'importe quelle string aléatoire 32+ chars)
+   - Onglet **Variables** : ajouter
+     - `E2E_ENABLED` = `true`
+
+3. Au prochain push, le job `E2E · Playwright` apparaît à côté du job `build`. Sur failure, le rapport HTML est uploadé en artifact (téléchargeable depuis l'onglet Actions).
+
+⚠️ **Pourquoi une base séparée** : les tests créent et suppriment des feedbacks. Ils utilisent des titres préfixés `[E2E timestamp]` et nettoient via `afterEach`, mais une base dédiée garantit zéro pollution sur la prod.
+
 ---
 
 ## Schéma Airtable
