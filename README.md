@@ -183,6 +183,7 @@ Les vérifications de propriété sont **dans les API routes**, pas dans l'UI :
 
 ### Hardening additionnel
 - **Length caps Zod** : `email.max(254)` (RFC 5321), `password.max(128)` → empêche un payload géant qui ferait boucler bcrypt côté serverless
+- **Rate limiting per-IP** (Upstash Redis, optionnel via `UPSTASH_REDIS_REST_*`) sur `/api/auth/login` (5/min), `/api/auth/signup` (3/min), `/api/feedbacks/[id]/vote` (20/min). No-op en dev/CI sans les env vars.
 - **Vercel Analytics** + **Sentry** (optionnel via `SENTRY_DSN` env var) → monitoring d'erreurs et Web Vitals en prod
 - **Tests E2E Playwright** sur 10 scenarios critiques (signup, login, vote, anti-double-vote, permissions cross-user, kanban workflow)
 
@@ -224,6 +225,7 @@ cp .env.example .env.local
 ```
 
 Variables optionnelles :
+- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` — active le rate limiting per-IP. Sans ces vars, le limiteur est no-op (pratique en dev/CI).
 - `SENTRY_DSN` + `NEXT_PUBLIC_SENTRY_DSN` (même valeur) — active le monitoring d'erreurs Sentry. Sans ces vars, le SDK reste no-op.
 - `SENTRY_AUTH_TOKEN`, `SENTRY_ORG`, `SENTRY_PROJECT` — pour l'upload de source maps au build (facultatif).
 
@@ -423,7 +425,6 @@ Organisée par effort × impact. Les tiers sont indépendants — vous pouvez pi
 | **Migration → Postgres** (Supabase / Neon) | Transactions atomiques, RLS, foreign keys, scalabilité | Apprentissage Prisma/Drizzle, perte de l'UI Airtable |
 | **NextAuth.js** | OAuth GitHub/Google, sessions DB révocables, password reset out-of-the-box | Couche d'abstraction supplémentaire à comprendre |
 | **Tests E2E (Playwright)** | Sécuriser les régressions sur signup, vote, anti-double-vote, permissions | Setup Playwright + DB de test |
-| **Rate limiting** (Upstash Redis) | Quelqu'un peut bombarder /signup ou /vote | ~1h de wiring, free tier suffit |
 | **Notifications email** | Vote reçu, status change | Resend + queue (Inngest ou Vercel Cron) |
 | **i18n FR/EN** | Élargir l'audience | next-intl + refactor strings |
 | **Audit a11y WCAG AA** | Aucun a11y check fait | axe-core en CI, focus visible, ARIA |

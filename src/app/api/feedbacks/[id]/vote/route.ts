@@ -6,12 +6,16 @@ import {
   incrementVoteCount,
 } from "@/lib/airtable";
 import { requireAuth } from "@/lib/api-helpers";
+import { rateLimit } from "@/lib/rate-limit";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-export async function POST(_request: Request, context: RouteContext) {
+export async function POST(request: Request, context: RouteContext) {
+  const limited = await rateLimit(request, { name: "vote", max: 20, window: "1 m" });
+  if (limited) return limited;
+
   const auth = await requireAuth();
   if (auth.error) return auth.error;
   const { user } = auth;

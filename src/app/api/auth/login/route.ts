@@ -3,9 +3,13 @@ import { NextResponse } from "next/server";
 import { getUserByEmail } from "@/lib/airtable";
 import { parseJsonBody } from "@/lib/api-helpers";
 import { dummyVerify, setAuthCookie, verifyPassword } from "@/lib/auth";
+import { rateLimit } from "@/lib/rate-limit";
 import { loginSchema } from "@/lib/schemas";
 
 export async function POST(request: Request) {
+  const limited = await rateLimit(request, { name: "login", max: 5, window: "1 m" });
+  if (limited) return limited;
+
   const parsed = await parseJsonBody(request, loginSchema);
   if (parsed.error) return parsed.error;
 

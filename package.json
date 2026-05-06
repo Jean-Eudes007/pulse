@@ -16,6 +16,8 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@sentry/nextjs": "^10.51.0",
     "@types/canvas-confetti": "^1.9.0",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "@vercel/analytics": "^2.0.1",
     "airtable": "^0.12.2",
     "bcryptjs": "^3.0.3",
