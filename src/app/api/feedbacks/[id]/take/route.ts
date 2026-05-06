@@ -6,7 +6,7 @@ import {
   setFeedbackStatus,
   upsertNotification,
 } from "@/lib/airtable";
-import { getCurrentUser } from "@/lib/auth";
+import { requireAuth } from "@/lib/api-helpers";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -17,16 +17,18 @@ type RouteContext = {
  * Only allowed if current status is "to_do".
  */
 export async function POST(_request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
+  const auth = await requireAuth({ role: "dev" });
+  if (auth.error) {
+    // Keep the friendlier French message for the dev-only constraint
+    if (auth.error.status === 403) {
+      return NextResponse.json(
+        { error: "Seuls les développeurs peuvent prendre un ticket" },
+        { status: 403 },
+      );
+    }
+    return auth.error;
   }
-  if (user.role !== "dev") {
-    return NextResponse.json(
-      { error: "Seuls les développeurs peuvent prendre un ticket" },
-      { status: 403 },
-    );
-  }
+  const { user } = auth;
 
   const { id } = await context.params;
   const feedback = await getFeedbackById(id);
@@ -46,7 +48,6 @@ export async function POST(_request: Request, context: RouteContext) {
   await assignFeedback(id, user.id);
   await setFeedbackStatus(id, "in_progress");
 
-  // Notify the creator (the dev taking it isn't the creator usually)
   if (feedback.creatorId && feedback.creatorId !== user.id) {
     await upsertNotification({
       recipientId: feedback.creatorId,

@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { getUserById } from "@/lib/airtable";
-import { getCurrentUser } from "@/lib/auth";
+import { requireAuth } from "@/lib/api-helpers";
 
 export async function GET() {
-  const auth = await getCurrentUser();
-  if (!auth) return NextResponse.json({ user: null }, { status: 401 });
+  const auth = await requireAuth();
+  if (auth.error) {
+    return NextResponse.json({ user: null }, { status: 401 });
+  }
 
-  const user = await getUserById(auth.id);
+  const user = await getUserById(auth.user.id);
   if (!user) return NextResponse.json({ user: null }, { status: 401 });
 
   return NextResponse.json({

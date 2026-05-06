@@ -1,19 +1,14 @@
 import { NextResponse } from "next/server";
 import { listDevs } from "@/lib/airtable";
-import { getCurrentUser } from "@/lib/auth";
+import { requireAuth } from "@/lib/api-helpers";
 
 /**
  * Returns the list of dev users (id + name + email).
  * Restricted to admins (used by the assign UI).
  */
 export async function GET() {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
-  if (user.role !== "admin") {
-    return NextResponse.json({ error: "Action refusée" }, { status: 403 });
-  }
+  const auth = await requireAuth({ role: "admin" });
+  if (auth.error) return auth.error;
 
   const devs = await listDevs();
   return NextResponse.json({

@@ -5,17 +5,16 @@ import {
   getFeedbackById,
   incrementVoteCount,
 } from "@/lib/airtable";
-import { getCurrentUser } from "@/lib/auth";
+import { requireAuth } from "@/lib/api-helpers";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
 export async function POST(_request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+  const { user } = auth;
 
   const { id } = await context.params;
   const feedback = await getFeedbackById(id);
@@ -37,16 +36,16 @@ export async function POST(_request: Request, context: RouteContext) {
   await createVote({ feedbackId: id, userId: user.id });
   await incrementVoteCount(id, feedback.voteCount);
 
-  return NextResponse.json({
-    voteCount: feedback.voteCount + 1,
-  });
+  return NextResponse.json({ voteCount: feedback.voteCount + 1 });
 }
 
 export async function GET(_request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-  if (!user) {
+  const auth = await requireAuth();
+  if (auth.error) {
+    // Return 401 with hasVoted: false to keep client logic simple
     return NextResponse.json({ hasVoted: false }, { status: 401 });
   }
+  const { user } = auth;
 
   const { id } = await context.params;
   const existing = await findVote({ feedbackId: id, userId: user.id });

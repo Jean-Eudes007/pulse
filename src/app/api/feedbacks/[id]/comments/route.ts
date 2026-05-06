@@ -1,13 +1,12 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import {
   createComment,
   getFeedbackById,
   listComments,
   upsertNotification,
 } from "@/lib/airtable";
-import { getCurrentUser } from "@/lib/auth";
+import { parseJsonBody, requireAuth } from "@/lib/api-helpers";
 import { createCommentSchema } from "@/lib/schemas";
 
 type RouteContext = {
@@ -15,35 +14,21 @@ type RouteContext = {
 };
 
 export async function GET(_request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   const { id } = await context.params;
   const comments = await listComments(id);
   return NextResponse.json({ comments });
 }
 
 export async function POST(request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+  const { user } = auth;
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const parsed = createCommentSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: z.treeifyError(parsed.error) },
-      { status: 400 },
-    );
-  }
+  const parsed = await parseJsonBody(request, createCommentSchema);
+  if (parsed.error) return parsed.error;
 
   const { id } = await context.params;
   const feedback = await getFeedbackById(id);
@@ -60,7 +45,6 @@ export async function POST(request: Request, context: RouteContext) {
     body: parsed.data.body,
   });
 
-  // Notify the feedback creator (skip if commenter IS the creator)
   if (feedback.creatorId && feedback.creatorId !== user.id) {
     await upsertNotification({
       recipientId: feedback.creatorId,

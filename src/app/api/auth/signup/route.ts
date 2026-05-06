@@ -1,25 +1,13 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import { createUser, getUserByEmail } from "@/lib/airtable";
+import { parseJsonBody } from "@/lib/api-helpers";
 import { hashPassword, setAuthCookie } from "@/lib/auth";
 import { signupSchema } from "@/lib/schemas";
 
 export async function POST(request: Request) {
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const parsed = signupSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: z.treeifyError(parsed.error) },
-      { status: 400 },
-    );
-  }
+  const parsed = await parseJsonBody(request, signupSchema);
+  if (parsed.error) return parsed.error;
 
   const { email, password, name } = parsed.data;
   const existing = await getUserByEmail(email);

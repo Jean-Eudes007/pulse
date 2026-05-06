@@ -1,12 +1,11 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import {
   assignFeedback,
   getFeedbackById,
   getUserById,
 } from "@/lib/airtable";
-import { getCurrentUser } from "@/lib/auth";
+import { parseJsonBody, requireAuth } from "@/lib/api-helpers";
 import { assignSchema } from "@/lib/schemas";
 
 type RouteContext = {
@@ -14,28 +13,11 @@ type RouteContext = {
 };
 
 export async function PATCH(request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
-  if (user.role !== "admin") {
-    return NextResponse.json({ error: "Action refusée" }, { status: 403 });
-  }
+  const auth = await requireAuth({ role: "admin" });
+  if (auth.error) return auth.error;
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const parsed = assignSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: z.treeifyError(parsed.error) },
-      { status: 400 },
-    );
-  }
+  const parsed = await parseJsonBody(request, assignSchema);
+  if (parsed.error) return parsed.error;
 
   const { id } = await context.params;
   const feedback = await getFeedbackById(id);

@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import {
   deleteFeedback,
   getFeedbackById,
   updateFeedback,
 } from "@/lib/airtable";
-import { getCurrentUser } from "@/lib/auth";
+import { parseJsonBody, requireAuth } from "@/lib/api-helpers";
 import { updateFeedbackSchema } from "@/lib/schemas";
 
 type RouteContext = {
@@ -13,10 +12,9 @@ type RouteContext = {
 };
 
 export async function GET(_request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+
   const { id } = await context.params;
   const feedback = await getFeedbackById(id);
   if (!feedback) {
@@ -26,10 +24,9 @@ export async function GET(_request: Request, context: RouteContext) {
 }
 
 export async function PATCH(request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+  const { user } = auth;
 
   const { id } = await context.params;
   const feedback = await getFeedbackById(id);
@@ -41,30 +38,17 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Action refusée" }, { status: 403 });
   }
 
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const parsed = updateFeedbackSchema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: z.treeifyError(parsed.error) },
-      { status: 400 },
-    );
-  }
+  const parsed = await parseJsonBody(request, updateFeedbackSchema);
+  if (parsed.error) return parsed.error;
 
   const updated = await updateFeedback(id, parsed.data);
   return NextResponse.json({ feedback: updated });
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: "Non authentifié" }, { status: 401 });
-  }
+  const auth = await requireAuth();
+  if (auth.error) return auth.error;
+  const { user } = auth;
 
   const { id } = await context.params;
   const feedback = await getFeedbackById(id);
