@@ -59,6 +59,25 @@ export async function requireAuth(
 }
 
 /**
+ * Build a single human-readable error string from a ZodError so the
+ * client can display the real reason ("Description min. 10 caractères")
+ * instead of a generic "Validation failed". Schemas in lib/schemas.ts
+ * already define explicit French messages, so we just join the unique
+ * issue messages here.
+ */
+function formatZodIssues(error: z.ZodError): string {
+  const seen = new Set<string>();
+  const messages: string[] = [];
+  for (const issue of error.issues) {
+    if (issue.message && !seen.has(issue.message)) {
+      seen.add(issue.message);
+      messages.push(issue.message);
+    }
+  }
+  return messages.length > 0 ? messages.join(" · ") : "Validation failed";
+}
+
+/**
  * Parse + validate a request JSON body against a Zod schema.
  *
  * Usage:
@@ -84,7 +103,10 @@ export async function parseJsonBody<T>(
     return {
       data: null,
       error: NextResponse.json(
-        { error: "Validation failed", details: z.treeifyError(result.error) },
+        {
+          error: formatZodIssues(result.error),
+          details: z.treeifyError(result.error),
+        },
         { status: 400 },
       ),
     };
