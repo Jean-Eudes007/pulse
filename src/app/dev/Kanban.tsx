@@ -25,7 +25,15 @@ import { COLUMN_LABELS, type DevLite } from "./kanban-types";
 
 // Lazy-load canvas-confetti — only fetched (~6KB) when a dev actually
 // finishes a ticket. Most users never trigger this.
+// I-4 audit: respect prefers-reduced-motion — skip the animation
+// entirely for users who opted out of motion at the OS level.
 async function celebrate() {
+  if (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    return;
+  }
   const { default: confetti } = await import("canvas-confetti");
   const opts = { spread: 70, ticks: 200, gravity: 1, scalar: 0.9 };
   confetti({ ...opts, particleCount: 80, origin: { x: 0.2, y: 0.85 }, angle: 60 });

@@ -132,7 +132,10 @@ export function FeedbackActions(props: Props) {
         </select>
 
         {error && (
-          <p className="text-sm text-type-bug-text bg-type-bug-bg rounded-md px-3 py-2">
+          <p
+          role="alert"
+          className="text-sm text-type-bug-text bg-type-bug-bg rounded-md px-3 py-2"
+        >
             {error}
           </p>
         )}
@@ -205,7 +208,10 @@ export function FeedbackActions(props: Props) {
       </div>
 
       {error && (
-        <p className="text-sm text-type-bug-text bg-type-bug-bg rounded-md px-3 py-2">
+        <p
+          role="alert"
+          className="text-sm text-type-bug-text bg-type-bug-bg rounded-md px-3 py-2"
+        >
           {error}
         </p>
       )}

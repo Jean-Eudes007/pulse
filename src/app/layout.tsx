@@ -1,7 +1,7 @@
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
+import { AppToaster } from "@/components/AppToaster";
 import { Header } from "@/components/Header";
 import { VerificationBanner } from "@/components/VerificationBanner";
 import { getCurrentUser } from "@/lib/auth";
@@ -50,14 +50,25 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-full flex flex-col bg-bg-tertiary text-text-primary font-sans">
+        {/* C-2 audit: skip-to-content for keyboard users — invisible
+            until focused, then sits top-left on top of everything. */}
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-action focus:text-text-info focus:px-3 focus:py-2 focus:rounded-md focus:text-sm focus:font-medium"
+        >
+          Aller au contenu principal
+        </a>
         <Header />
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
+        <main
+          id="main"
+          className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8"
+        >
           {showVerificationBanner && user && (
             <VerificationBanner email={user.email} />
           )}
           {children}
         </main>
-        <Toaster position="bottom-right" richColors closeButton />
+        <AppToaster />
         <Analytics />
       </body>
     </html>

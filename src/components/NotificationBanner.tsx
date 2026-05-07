@@ -48,7 +48,10 @@ export function NotificationBanner() {
   }
 
   return (
-    <div className="bg-info-bg border border-info-border rounded-lg p-4 sm:p-5 mb-4">
+    <aside
+      aria-label="Notifications de feedbacks"
+      className="bg-info-bg border border-info-border rounded-lg p-4 sm:p-5 mb-4"
+    >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div>
           <p className="text-sm font-semibold text-info-text">
@@ -88,6 +91,6 @@ export function NotificationBanner() {
           );
         })}
       </ul>
-    </div>
+    </aside>
   );
 }

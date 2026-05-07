@@ -108,7 +108,10 @@ export default function SubmitPage() {
         </div>
 
         {error && (
-          <p className="text-sm text-type-bug-text bg-type-bug-bg rounded-md px-3 py-2">
+          <p
+            role="alert"
+            className="text-sm text-type-bug-text bg-type-bug-bg rounded-md px-3 py-2"
+          >
             {error}
           </p>
         )}
@@ -116,6 +119,7 @@ export default function SubmitPage() {
         <button
           type="submit"
           disabled={pending}
+          aria-busy={pending}
           className="w-full rounded-md bg-action text-text-info py-2.5 text-sm font-medium hover:bg-action-hover transition-colors disabled:opacity-50"
         >
           {pending ? "Envoi…" : "Soumettre le feedback"}
