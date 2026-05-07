@@ -89,6 +89,19 @@ Pas de plugin, pas d'IA, pas d'intégration Slack. Juste l'essentiel pour arrêt
 - **Toasts** ([sonner](https://sonner.emilkowal.ski/)) sur toutes les mutations (login, signup, vote, edit, delete, logout)
 - **Édition inline** sur la page détail (toggle "Modifier" → form dans la même page, pas de route `/edit` séparée)
 
+### Évolutions livrées (V2 → V5) ✅
+
+- **Workflow dev kanban** — table `Feedbacks.Status`, page `/dev` à 4 colonnes (à faire / en cours / review / livré), drag-drop ([dnd-kit](https://dndkit.com/)) avec boutons fallback pour clavier et mobile, confetti à la livraison (respecte `prefers-reduced-motion`)
+- **Notifications in-app** — bannière sur la liste pour le créateur quand son feedback avance, badge sur les cards, dismiss persistant
+- **Commentaires** — table `Comments`, fil de discussion sur la page détail, notification automatique au créateur
+- **Dashboard admin tabbed** — `/admin?tab=overview` (KPIs + charts recharts + top votes + top contributeurs) et `?tab=list` (modération)
+- **Auth durcie** — email verification (token 24h, gate optionnel via env), password reset (token 1h), tous via Resend (gracieusement dégradé sans clé d'API)
+- **Rate limiting** — Upstash Redis sliding window sur `/api/auth/login` (5/min), `/api/auth/signup` (3/min), `/api/feedbacks/[id]/vote` (20/min)
+- **Observabilité** — Sentry (erreurs prod) + Vercel Analytics (Web Vitals)
+- **Dark mode** — toggle manuel persistant + détection auto `prefers-color-scheme`, tokens CSS isolés via `@theme inline`
+- **Qualité** — 10 tests E2E Playwright + GitHub Actions CI (typecheck + lint + build à chaque PR), audit code interne (sécurité + architecture + performance + accessibilité) avec correctifs documentés
+- **Accessibilité WCAG 2.1 AA** — audit interne passé, focus visible global, skip-link, contrast AA, `role="alert"` sur erreurs, `prefers-reduced-motion` respecté (cf. [Accessibilité](#accessibilité))
+
 ---
 
 ## Stack & justifications
@@ -481,10 +494,7 @@ Organisée par effort × impact. Les tiers sont indépendants — vous pouvez pi
 |---|---|---|
 | **Status sur feedback** | Champ `Status` (open / planned / in-progress / shipped / declined) modifiable par admin, badge sur la liste | Évite de re-soumettre des idées déjà traitées |
 | **Recherche full-text** | Input avec debounce, filtre `?q=...` côté API via `SEARCH({Title}, q)` Airtable | Demandé par tous les seed users (top des votes !) |
-| **Commentaires (thread)** | Nouvelle table `Comments`, route `/api/feedbacks/[id]/comments` | Discussion avant action |
 | **Tags / catégories** | Champ `multipleSelects` Airtable, multi-filtre combiné avec type | Pour équipes multi-produits |
-| **Email verification** | Resend.com (gratuit) + token jeton expirant, route `/verify/[token]` | N'importe qui peut signup avec un email random |
-| **Password reset** | Resend + token expirant 1h | Aucune issue actuellement si user oublie |
 | **Export CSV** (admin) | API `/api/admin/export` qui stream un CSV | Reporting mensuel |
 | **Soft delete** | Champ `DeletedAt` au lieu de `DELETE` Airtable | Récupération en cas d'erreur admin |
 | **Pagination cursor** | `?cursor=...` + bouton "Charger plus" | Au-delà de 100 feedbacks |
@@ -496,13 +506,9 @@ Organisée par effort × impact. Les tiers sont indépendants — vous pouvez pi
 |---|---|---|
 | **Migration → Postgres** (Supabase / Neon) | Transactions atomiques, RLS, foreign keys, scalabilité | Apprentissage Prisma/Drizzle, perte de l'UI Airtable |
 | **NextAuth.js** | OAuth GitHub/Google, sessions DB révocables, password reset out-of-the-box | Couche d'abstraction supplémentaire à comprendre |
-| **Tests E2E (Playwright)** | Sécuriser les régressions sur signup, vote, anti-double-vote, permissions | Setup Playwright + DB de test |
-| **Notifications email** | Vote reçu, status change | Resend + queue (Inngest ou Vercel Cron) |
+| **Notifications email** | Vote reçu, status change envoyés par email (en plus de la bannière in-app actuelle) | Resend + queue (Inngest ou Vercel Cron) |
 | **i18n FR/EN** | Élargir l'audience | next-intl + refactor strings |
 | **Audit a11y automatisé en CI** | Audit manuel WCAG AA déjà passé (cf. [Accessibilité](#accessibilité)). Manque axe-core / Lighthouse-CI pour ne pas régresser | Job CI `@axe-core/playwright`, ~2h setup |
-| **CI/CD** (GitHub Actions) | Typecheck + lint + build à chaque PR | `.github/workflows/ci.yml` |
-| **Sentry** | Erreurs prod actuellement silencieuses | `@sentry/nextjs`, free tier 5k events/mois |
-| **Dark mode** 😏 | Top des feedbacks de Pulse lui-même | Tokens Tailwind déjà prêts, ~½ jour |
 | **Mobile redesign** | Cards trop denses sur smartphone | 1-2 jours UX + tests sur vrais devices |
 
 ---
