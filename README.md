@@ -16,13 +16,14 @@ Stack : **Next.js 16** (App Router) · **TypeScript** · **Tailwind v4** · **Ai
 3. [Stack & justifications](#stack--justifications)
 4. [Architecture](#architecture)
 5. [Modèle de sécurité](#modèle-de-sécurité)
-6. [Setup local](#setup-local)
-7. [Schéma Airtable](#schéma-airtable)
-8. [Structure du code](#structure-du-code)
-9. [Décisions techniques (mini-ADRs)](#décisions-techniques-mini-adrs)
-10. [Roadmap V2 / V3](#roadmap-v2--v3)
-11. [Limitations connues](#limitations-connues)
-12. [Crédits](#crédits)
+6. [Accessibilité](#accessibilité)
+7. [Setup local](#setup-local)
+8. [Schéma Airtable](#schéma-airtable)
+9. [Structure du code](#structure-du-code)
+10. [Décisions techniques (mini-ADRs)](#décisions-techniques-mini-adrs)
+11. [Roadmap V2 / V3](#roadmap-v2--v3)
+12. [Limitations connues](#limitations-connues)
+13. [Crédits](#crédits)
 
 ---
 
@@ -186,6 +187,47 @@ Les vérifications de propriété sont **dans les API routes**, pas dans l'UI :
 - **Rate limiting per-IP** (Upstash Redis, optionnel via `UPSTASH_REDIS_REST_*`) sur `/api/auth/login` (5/min), `/api/auth/signup` (3/min), `/api/feedbacks/[id]/vote` (20/min). No-op en dev/CI sans les env vars.
 - **Vercel Analytics** + **Sentry** (optionnel via `SENTRY_DSN` env var) → monitoring d'erreurs et Web Vitals en prod
 - **Tests E2E Playwright** sur 10 scenarios critiques (signup, login, vote, anti-double-vote, permissions cross-user, kanban workflow)
+
+---
+
+## Accessibilité
+
+Cible **WCAG 2.1 AA**. Audit interne passé, correctifs appliqués sur les écarts les plus visibles.
+
+### Fondations (déjà en place avant audit)
+
+- `<html lang="fr">` + landmarks sémantiques (`<header>`, `<nav>`, `<main>`, `<aside>`)
+- Tous les `<input>` ont un `<label htmlFor>` associé (Lighthouse 100)
+- Tous les boutons icon-only (toggle thème, dismiss notif, select assign) ont un `aria-label`
+- Hiérarchie de titres propre : 1 `<h1>` par page, `<h2>` cohérents
+- `TypeBadge` / `StatusBadge` : emojis en `aria-hidden`, label texte lu par les lecteurs d'écran
+- Le drag-drop kanban a un **fallback bouton complet** — toutes les actions sont accessibles au clavier sans drag
+
+### Correctifs livrés (audit interne)
+
+| ID | Correctif | Impact |
+|---|---|---|
+| **C-1** | Focus ring global (`:focus-visible` outline action color, 2px, offset 2px) | Tab navigation visible — WCAG 2.4.7 |
+| **C-2** | Skip link "Aller au contenu principal" (sr-only, devient visible au focus) | Bypass du Header pour clavier — WCAG 2.4.1 |
+| **C-3** | `text-tertiary` foncé en light (#6e6e6e) et dark (#9a9a9a) | Contraste AA 4.5:1 — WCAG 1.4.3 |
+| **I-3** | `role="alert"` sur tous les blocs d'erreur form (login, signup, submit, reset, FeedbackActions) | Erreurs annoncées par lecteur d'écran après submit |
+| **I-4** | `celebrate()` confetti respecte `prefers-reduced-motion: reduce` | WCAG 2.3.3, sensibilité vestibulaire |
+| **A-2** | `aria-busy={pending}` sur boutons submit pendant les requêtes API | État "occupé" exposé aux lecteurs d'écran |
+| **A-3** | Bannières `Notification` et `Verification` en `<aside aria-label>` | Landmarks navigables |
+| **A-4** | `inputMode="email"` explicite sur les champs email | Clavier mobile correct, défense en profondeur sur `type=email` |
+| **A-5** | `AppToaster` synchronise sonner avec `data-theme` Pulse (au lieu de `prefers-color-scheme`) | Toasts cohérents avec le thème manuel choisi |
+
+### Items audit identifiés mais non encore corrigés (V3)
+
+| ID | Item | Effort |
+|---|---|---|
+| I-1 | `KeyboardSensor` sur dnd-kit pour drag clavier (fallback bouton existe) | ~10 min |
+| I-2 | Émojis dans labels de boutons en `aria-hidden` (ex: "📌 Backlog", "🗑️ Supprimer") | ~15 min |
+| I-5 | `aria-current="page"` sur les liens du Header correspondant à la route active | ~15 min |
+
+### Limites connues
+- Pas d'audit a11y automatisé en CI (axe-core ou Lighthouse-CI). Listé en V3 dans la roadmap.
+- Pas de test manuel avec lecteur d'écran réel (NVDA / VoiceOver) — testé via inspection statique du markup.
 
 ---
 
@@ -457,164 +499,11 @@ Organisée par effort × impact. Les tiers sont indépendants — vous pouvez pi
 | **Tests E2E (Playwright)** | Sécuriser les régressions sur signup, vote, anti-double-vote, permissions | Setup Playwright + DB de test |
 | **Notifications email** | Vote reçu, status change | Resend + queue (Inngest ou Vercel Cron) |
 | **i18n FR/EN** | Élargir l'audience | next-intl + refactor strings |
-| **Audit a11y WCAG AA** | Aucun a11y check fait | axe-core en CI, focus visible, ARIA |
+| **Audit a11y automatisé en CI** | Audit manuel WCAG AA déjà passé (cf. [Accessibilité](#accessibilité)). Manque axe-core / Lighthouse-CI pour ne pas régresser | Job CI `@axe-core/playwright`, ~2h setup |
 | **CI/CD** (GitHub Actions) | Typecheck + lint + build à chaque PR | `.github/workflows/ci.yml` |
 | **Sentry** | Erreurs prod actuellement silencieuses | `@sentry/nextjs`, free tier 5k events/mois |
 | **Dark mode** 😏 | Top des feedbacks de Pulse lui-même | Tokens Tailwind déjà prêts, ~½ jour |
 | **Mobile redesign** | Cards trop denses sur smartphone | 1-2 jours UX + tests sur vrais devices |
-
----
-
-## Présentation projet
-
-Trame pour la présentation finale (formatrice + autres stagiaires, ~25 min total). Public principal **non-tech**, avec une formatrice dev pour les apartés techniques.
-
-### Format
-
-| Partie | Durée | Pour qui ? |
-|---|---|---|
-| 1. La stack expliquée | ~10 min | Stagiaires (récit) + formatrice (maturité tech) |
-| 2. Démo live (Bob / Alice / Yasmine) | 10 min max | Tout le monde |
-| 3. Q&A | 5 min | Tout le monde |
-
-### Partie 1 — La stack expliquée (10 min)
-
-Format pour chaque outil :
-1. *"X, c'est un [outil de]..."* — 1 phrase pour le non-tech
-2. *[Aparté formatrice : un détail technique précis]* — court
-3. *"Dans Pulse, je m'en sers pour..."* — concret
-4. *"Sans ça, il aurait fallu..."* — optionnel, pour faire sentir la valeur
-
-Cinq blocs stack + un bloc sécurité, ~1.5 min chacun.
-
-#### Ouverture (30 s)
-> "La question que vous allez tous me poser : *mais concrètement, comment t'as fait pour coder ça ?* Je vais vous montrer chaque pièce de la machine, dans l'ordre où on les rencontre quand on construit un projet web moderne."
-
-#### 1. Le code de l'app — Next.js + TypeScript + Tailwind (~1.5 min)
-- **Next.js** : un *framework*, un squelette pré-construit qui s'occupe des trucs chiants (URLs, rendu des pages, communication base de données). Aparté formatrice : *Next.js 16, App Router, React Server Components.*
-- **TypeScript** : du JavaScript avec un correcteur orthographique pour les bugs. M'a évité des dizaines d'erreurs idiotes.
-- **Tailwind CSS** : la mise en forme (couleurs, espacement, mode sombre) écrite directement dans le code.
-
-> **Sans ces 3 outils** : framework maison, code sans filet, du temps perdu sur des bugs visuels. Gain : ~2 jours.
-
-#### 2. GitHub (~1.5 min)
-- C'est l'endroit où vit le code. Imaginez une **Google Docs pour le code**, avec une mémoire infinie. Si je casse un truc, je remonte dans le temps en 2 clics.
-- Aparté formatrice : *git workflow classique, branch main, 60+ commits scopés, repo public.*
-- Dans Pulse, GitHub me sert à : (1) sauvegarder, (2) garder l'historique, (3) déclencher **GitHub Actions** — un robot qui vérifie à chaque commit que le code compile + respecte les règles + ne casse rien. Vert ou rouge en 1 minute.
-
-#### 3. Vercel (~1.5 min)
-- C'est l'endroit où l'app est **en ligne**. Pas de serveur à configurer, pas de HTTPS à gérer, pas de mise en prod manuelle.
-- Aparté formatrice : *Vercel = éditeur de Next.js, hébergement serverless, déploiement git-based, preview URLs par PR, free tier suffisant.*
-- Le truc magique : **git push → 30 secondes → site mis à jour en ligne**.
-
-> **Sans ça** : louer un serveur, configurer SSL, mettre en place un CI/CD = un week-end de plomberie.
-
-#### 4. Airtable (~1.5 min)
-- La base de données. Pour faire simple, **un Excel collaboratif en ligne** branché à mon app.
-- Aparté formatrice : *choix pédagogique, pas de migrations SQL pendant la formation, UI pour debug, free tier suffit. Limites assumées (5 req/s, pas de transactions) → plan de migration Postgres en V3 documenté.*
-- 5 tables : Users, Feedbacks, Votes, Notifications, Comments. Je peux ouvrir Airtable directement pour debug.
-
-#### 5. Les services satellites — Resend, Redis, Sentry (~1.5 min)
-
-Trois services qui font chacun **une chose mieux que je ne saurais le faire** :
-
-- **Resend** — envoi d'emails (vérification compte + reset password). Gère délivrabilité + spam folder + serveurs SMTP à ma place.
-- **Upstash Redis** — anti-spam. Bloque après 5 essais de login en moins d'une minute. Invisible pour les vrais users, brutal pour les attaquants.
-- **Sentry** — détecteur d'erreurs en prod. Si une page plante, je reçois un email avec la cause + la ligne de code.
-
-Aparté formatrice : *tous gracieusement dégradés — sans clés d'API, l'app continue de tourner. Volontaire pour que le dev local reste simple.*
-
-#### 6. Sécurité — ce qui protège l'app (~1.5 min)
-
-> "Avec des comptes utilisateurs et des données privées en jeu, plusieurs couches sont indispensables."
-
-- **Mots de passe protégés** : chiffrés avec bcrypt, jamais stockés en clair, illisibles même pour moi.
-- **Sessions sécurisées** : cookie signé par le serveur, transmis en HTTPS, inaccessible au code de la page.
-- **Anti-bombardement** : login bloqué après 5 essais en 1 minute. Vote, signup et reset password aussi limités.
-- **Vérification + reset par email** : pas d'inscription avec une adresse fictive, liens à expiration et à usage unique.
-
-Aparté formatrice : *bcrypt cost 10, JWT HS256 + cookie httpOnly + sameSite=lax + secure, dummy bcrypt sur email inconnu (anti timing-attack), Upstash Redis sliding window, validation Zod sur toutes les bodies API, headers HTTP de sécurité (HSTS, X-Frame-Options), token Airtable jamais exposé côté client. Audit de code complet documenté dans le README — items identifiés et traités.*
-
-#### Atterrissage (30 s)
-> "Pour résumer : **GitHub** stocke le code, **Vercel** le met en ligne, **Next.js** fait tourner les pages, **Airtable** stocke les données, **Resend / Redis / Sentry** s'occupent des cas tordus. Tout ça gratuit, moderne, interconnecté."
-
-### Slide d'appui (architecture)
-
-```
-                      ┌─────────────────────┐
-                      │     Navigateur      │
-                      │  (Bob, Alice, ...)  │
-                      └──────────┬──────────┘
-                                 │
-                      ┌──────────▼──────────┐
-                      │       Vercel        │
-                      │   (site en ligne)   │
-                      │   ↑ Next.js + TS    │
-                      └──┬───────────────┬──┘
-                         │               │
-        ┌────────────────┘               └──────────────┐
-        │                                                │
-┌───────▼──────┐  ┌──────────────┐  ┌────────────┐  ┌───▼──────┐
-│   Airtable   │  │    Resend    │  │   Redis    │  │  Sentry  │
-│  (données)   │  │   (emails)   │  │ (anti-spam)│  │ (erreurs)│
-└──────────────┘  └──────────────┘  └────────────┘  └──────────┘
-
-┌─────────────┐    ┌──────────────────┐
-│   GitHub    │ ─► │  GitHub Actions  │  → vérifications auto
-│ (code + 📚) │    │  (le robot CI)   │
-└─────────────┘
-```
-
-### Partie 2 — Démo live (10 min)
-
-**Setup avant la démo** : 3 onglets Chrome ouverts, déjà loggés, à ne pas fermer (cookie JWT vit 7 jours).
-
-| Onglet | Compte | URL de départ |
-|---|---|---|
-| 1 | bob@test.com | `/feedbacks` |
-| 2 | alice@test.com | `/admin` |
-| 3 | yasmine@pulse.app | `/dev` |
-
-#### Acte 1 — Bob soumet (~1.5 min)
-- Click "Soumettre" → titre `Mode sombre`, type `Idée`, description "L'app me brûle les yeux la nuit"
-- Submit → toast → retour sur `/feedbacks`
-- **Punchline** : tenter de voter pour son propre feedback → bloqué. "Pas de spam possible."
-
-#### Acte 2 — Bob vote ailleurs (~1 min)
-- Click sur un autre feedback existant → vote → ⭐+1
-- "Un user, un vote par feedback. Simple, juste, scalable."
-
-#### Acte 3 — Alice voit le tableau de bord (~3 min)
-- L'onglet ouvre direct sur `/admin` (vue d'ensemble, KPIs + charts)
-- Pointer 3 trucs rapidement : compteurs, chart "répartition par type", top 5 par votes
-- Click onglet "Liste & modération" → bouton 📌 sur le mode sombre → toast
-- "Pulse a notifié Bob automatiquement, on le verra à la fin."
-
-#### Acte 4 — Yasmine prend le ticket (~3 min)
-- Refresh `/dev` → mode sombre dans "À faire", non assigné
-- **Drag-drop** vers "En cours" → assignation auto à Yasmine
-- Drag vers "Review" → drag vers "Livré" → 🎉 confetti
-- 2 secondes de pause silencieuse pour laisser l'effet retomber
-
-#### Acte 5 — La boucle se ferme (~1 min)
-- Onglet Bob, refresh
-- Bannière notification jaune : "🔔 ton feedback Mode sombre est livré"
-- Click → page détail, statut "Livré"
-- "Boucle complète : feedback → vote → priorisation → dev → notification."
-
-### Pièges à éviter
-- **Tester la démo 2x en chrono complet** avant le jour J
-- **Pas de code à l'écran**. Au pire, l'arborescence des fichiers 5 secondes
-- **Pas de "j'ai pas eu le temps de"**. Reformuler en "c'est dans le backlog V3, voici pourquoi j'ai priorisé X"
-- **Drag-drop** : mouvement franc (>6px) sinon ne déclenche pas. Boutons fallback dispo en plan B
-- **Refresh Bob à la fin** : pas trop tôt, sinon notif pas encore arrivée
-
-### Optionnel — la pièce IA
-Si tu veux jouer transparent (et probablement déclencher LE plus de questions stagiaires), 1 min après la stack :
-
-> "**Claude Code** — un assistant IA qui m'a aidé à coder. Je décrivais ce que je voulais, il proposait, je relisais, je validais. Je suis resté décideur (archi, sécurité, UX). Sans IA, ~3x plus de temps. Avec, je me suis concentré sur les décisions plutôt que la frappe au clavier."
-
-À assumer ou pas selon l'ambiance promo. "L'IA a tout fait" = mauvais signal. "J'ai dirigé l'IA" = bon signal.
 
 ---
 
