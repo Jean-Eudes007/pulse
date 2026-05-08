@@ -32,7 +32,7 @@ export async function listComments(
 ): Promise<CommentWithAuthor[]> {
   const records = await commentsTable
     .select({
-      filterByFormula: `{Feedback_Id} = '${Feedback_Id}'`,
+      filterByFormula: `{feedbackid} = '${feedbackid}'`,
       sort: [{ field: "CreatedAt", direction: "asc" }],
       pageSize: AIRTABLE_PAGE_SIZE,
     })
