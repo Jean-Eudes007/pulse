@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     name,
     verificationToken,
     verificationExpires,
-    emailVerifiedAt: new Date().toISOString(),
+    email_verified_at: new Date().toISOString(),
   });
 
   const verifyUrl = `${getAppUrl()}/api/auth/verify/${verificationToken}`;
