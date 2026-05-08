@@ -76,7 +76,7 @@ export async function upsertNotification(input: {
 }): Promise<void> {
   const existing = await notificationsTable
     .select({
-      filterByFormula: `AND({RecipientId} = '${input.recipientId}', {FeedbackId} = '${input.feedbackId}')`,
+      filterByFormula: `AND({RecipientId} = '${input.recipientId}', {Feedback_Id} = '${input.feedbackId}')`,
       maxRecords: 1,
     })
     .firstPage();
@@ -128,7 +128,7 @@ export async function deleteNotificationForFeedback(
 ): Promise<void> {
   const records = await notificationsTable
     .select({
-      filterByFormula: `AND({RecipientId} = '${recipientId}', {FeedbackId} = '${feedbackId}')`,
+      filterByFormula: `AND({RecipientId} = '${recipientId}', {Feedback_Id} = '${Feedback_Id}')`,
       maxRecords: 5,
     })
     .firstPage();

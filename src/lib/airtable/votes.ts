@@ -21,7 +21,7 @@ export async function findVote(input: {
   feedbackId: string;
   userId: string;
 }): Promise<VoteRecord | null> {
-  const formula = `AND({FeedbackId} = '${input.feedbackId}', {UserId} = '${input.userId}')`;
+  const formula = `AND({Feedback_Id} = '${input.feedbackId}', {UserId} = '${input.userId}')`;
   const records = await votesTable
     .select({ filterByFormula: formula, maxRecords: 1 })
     .firstPage();
