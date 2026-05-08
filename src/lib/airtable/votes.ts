@@ -21,7 +21,7 @@ export async function findVote(input: {
   feedbackId: string;
   userId: string;
 }): Promise<VoteRecord | null> {
-  const formula = `AND({feedbackid} = '${input.feedbackId}', {UserId} = '${input.userId}')`;
+  const formula = `AND({feedbackid} = '${input.feedbackId}', {userid} = '${input.userId}')`;
   const records = await votesTable
     .select({ filterByFormula: formula, maxRecords: 1 })
     .firstPage();
@@ -38,7 +38,7 @@ export async function createVote(input: {
         Feedback: [input.feedbackId],
         User: [input.userId],
         feedbackid: input.feedbackId,
-        UserId: input.userId,
+        userid: input.userId,
         CreatedAt: nowIso(),
       },
     },
