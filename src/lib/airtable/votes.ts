@@ -37,7 +37,7 @@ export async function createVote(input: {
       fields: {
         Feedback: [input.feedbackId],
         User: [input.userId],
-        FeedbackId: input.feedbackId,
+        feedbackid: input.feedbackId,
         UserId: input.userId,
         CreatedAt: nowIso(),
       },
