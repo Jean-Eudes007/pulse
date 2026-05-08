@@ -1,105 +1,41 @@
 @import "tailwindcss";
-
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-
-  /* Surfaces */
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #f7f7f5;
-  --color-bg-tertiary: #f0efec;
-
-  /* Textes */
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #5a5a5a;
-  /* C-3: bumped from #8a8a8a (~3.4:1) to #6e6e6e for WCAG AA compliance
-     (~4.7:1 against bg-primary). Subtle visual change, real a11y win. */
-  --color-text-tertiary: #6e6e6e;
-  --color-text-info: #ffffff;
-
-  /* Bordures */
-  --color-border-secondary: #d8d8d5;
-  --color-border-tertiary: #e8e8e5;
-
-  /* Action / primary button */
-  --color-action: #1a1a1a;
-  --color-action-hover: #333333;
-
-  /* Badges Type */
-  --color-type-bug-bg: #fcebeb;
-  --color-type-bug-text: #a32d2d;
-  --color-type-idee-bg: #eeedfe;
-  --color-type-idee-text: #534ab7;
-  --color-type-amelioration-bg: #e1f5ee;
-  --color-type-amelioration-text: #0f6e56;
-
-  /* Highlight (used on creator's own feedback when status changed) */
-  --color-highlight-bg: #fef9c3;
-  --color-highlight-border: #fcd34d;
-  --color-highlight-text: #713f12;
-  --color-highlight-stripe: #fde68a;
-
-  /* Info banner (notifications) */
-  --color-info-bg: #eff6ff;
-  --color-info-border: #bfdbfe;
-  --color-info-text: #1e3a8a;
-  --color-info-text-muted: #1d4ed8;
-  --color-info-stripe: #dbeafe;
-
-  /* Radii */
-  --radius-md: 6px;
-  --radius-lg: 12px;
-}
-
-/* Dark theme overrides — applied via [data-theme="dark"] on <html>.
-   Tokens are CSS custom props (Tailwind v4 @theme inline), so swapping
-   the var values cascade to every utility class consuming them. */
-[data-theme="dark"] {
-  --color-bg-primary: #1a1a1a;
-  --color-bg-secondary: #232323;
-  --color-bg-tertiary: #0d0d0d;
-
-  --color-text-primary: #f5f5f3;
-  --color-text-secondary: #a3a3a3;
-  /* C-3: bumped from #707070 (~3.0:1 on dark bg) to #9a9a9a for AA (~4.7:1). */
-  --color-text-tertiary: #9a9a9a;
-  --color-text-info: #1a1a1a;
-
-  --color-border-secondary: #3a3a3a;
-  --color-border-tertiary: #2a2a2a;
-
-  --color-action: #f5f5f3;
-  --color-action-hover: #d8d8d5;
-
-  --color-type-bug-bg: #3a1f1f;
+  --color-bg-primary: #0a0a0f;
+  --color-bg-secondary: #13131a;
+  --color-bg-tertiary: #070709;
+  --color-text-primary: #f0ede8;
+  --color-text-secondary: #9a9aaa;
+  --color-text-tertiary: #6e6e82;
+  --color-text-info: #0a0a0f;
+  --color-border-secondary: #2a2a38;
+  --color-border-tertiary: #1e1e2a;
+  --color-action: #c8a96e;
+  --color-action-hover: #e0c48a;
+  --color-type-bug-bg: #2a1515;
   --color-type-bug-text: #ff9b9b;
   --color-type-idee-bg: #2a2840;
   --color-type-idee-text: #b6abff;
-  --color-type-amelioration-bg: #1c3a2c;
+  --color-type-amelioration-bg: #151e2a;
   --color-type-amelioration-text: #5fdba1;
-
   --color-highlight-bg: #2d2410;
-  --color-highlight-border: #a16207;
-  --color-highlight-text: #fde68a;
-  --color-highlight-stripe: #422f08;
-
+  --color-highlight-border: #c8a96e;
+  --color-highlight-text: #f0ede8;
+  --color-highlight-stripe: #3a2e10;
   --color-info-bg: #0e2348;
   --color-info-border: #1e40af;
   --color-info-text: #dbeafe;
   --color-info-text-muted: #93c5fd;
   --color-info-stripe: #1e3a8a;
+  --radius-md: 6px;
+  --radius-lg: 12px;
 }
-
 html,
 body {
   background: var(--color-bg-tertiary);
   color: var(--color-text-primary);
 }
-
-/* C-1 audit: global focus ring. Tailwind utility classes wipe the
-   default browser outline on every interactive element; this adds it
-   back for keyboard users only (focus-visible, not :focus, so the
-   outline doesn't appear on mouse clicks). */
 *:focus-visible {
   outline: 2px solid var(--color-action);
   outline-offset: 2px;
