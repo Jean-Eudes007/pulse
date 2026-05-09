@@ -22,7 +22,7 @@ function mapComment(r: AirtableRecord): CommentRecord {
     id: r.id,
     feedbackId: feedbackIds[0] ?? null,
     authorId: authorIds[0] ?? null,
-    body: String(f.Body ?? ""),
+    body: String(f.body ?? ""),
     createdAt: String(f.CreatedAt ?? ""),
   };
 }
@@ -39,6 +39,7 @@ export async function listComments(
     .all();
   const comments = records.map(mapComment);
   if (comments.length === 0) return [];
+
   const authorIds = comments
     .map((c) => c.authorId)
     .filter((id): id is string => Boolean(id));
