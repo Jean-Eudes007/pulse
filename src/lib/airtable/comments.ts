@@ -62,7 +62,7 @@ export async function createComment(input: {
         Author: [input.authorId],
         feedbackid: input.feedbackId,
         authorid: input.authorId,
-        Body: input.body,
+        body: input.body,
         CreatedAt: nowIso(),
       },
     },
