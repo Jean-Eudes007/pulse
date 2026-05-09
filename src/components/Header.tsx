@@ -7,7 +7,7 @@ export async function Header() {
   const user = await getCurrentUser();
   return (
     <header className="border-b border-border-tertiary bg-bg-primary">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 h-18 flex items-center justify-between gap-2">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2">
         <Link
           href={user ? "/feedbacks" : "/"}
           className="text-lg font-bold text-text-primary shrink-0"
