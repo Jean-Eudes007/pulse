@@ -40,7 +40,7 @@ export async function listNotifications(
 ): Promise<NotificationWithFeedback[]> {
   const records = await notificationsTable
     .select({
-      filterByFormula: `{RecipientId} = '${recipientId}'`,
+      filterByFormula: `{recipientid} = '${recipientId}'`,
       sort: [{ field: "UpdatedAt", direction: "desc" }],
       pageSize: AIRTABLE_PAGE_SIZE,
     })
@@ -76,7 +76,7 @@ export async function upsertNotification(input: {
 }): Promise<void> {
   const existing = await notificationsTable
     .select({
-      filterByFormula: `AND({RecipientId} = '${input.recipientId}', {feedbackid} = '${input.feedbackId}')`,
+      filterByFormula: `AND({recipientid} = '${input.recipientId}', {feedbackid} = '${input.feedbackId}')`,
       maxRecords: 1,
     })
     .firstPage();
@@ -96,8 +96,8 @@ export async function upsertNotification(input: {
           Recipient: [input.recipientId],
           Feedback: [input.feedbackId],
           Status: input.status,
-          RecipientId: input.recipientId,
-          FeedbackId: input.feedbackId,
+          recipientid: input.recipientId,
+          feedbackid: input.feedbackId,
           CreatedAt: now,
           UpdatedAt: now,
         },
@@ -111,7 +111,7 @@ export async function deleteAllNotifications(
 ): Promise<void> {
   const records = await notificationsTable
     .select({
-      filterByFormula: `{RecipientId} = '${recipientId}'`,
+      filterByFormula: `{recipientid} = '${recipientId}'`,
       pageSize: AIRTABLE_PAGE_SIZE,
     })
     .all();
@@ -128,7 +128,7 @@ export async function deleteNotificationForFeedback(
 ): Promise<void> {
   const records = await notificationsTable
     .select({
-      filterByFormula: `AND({RecipientId} = '${recipientId}', {feedbackid} = '${feedbackid}')`,
+      filterByFormula: `AND({recipientid} = '${recipientId}', {feedbackid} = '${feedbackId}')`,
       maxRecords: 5,
     })
     .firstPage();

@@ -32,14 +32,13 @@ export async function listComments(
 ): Promise<CommentWithAuthor[]> {
   const records = await commentsTable
     .select({
-      filterByFormula: `{feedbackid} = '${feedbackid}'`,
+      filterByFormula: `{feedbackid} = '${feedbackId}'`,
       sort: [{ field: "CreatedAt", direction: "asc" }],
       pageSize: AIRTABLE_PAGE_SIZE,
     })
     .all();
   const comments = records.map(mapComment);
   if (comments.length === 0) return [];
-
   const authorIds = comments
     .map((c) => c.authorId)
     .filter((id): id is string => Boolean(id));
@@ -61,8 +60,8 @@ export async function createComment(input: {
       fields: {
         Feedback: [input.feedbackId],
         Author: [input.authorId],
-        FeedbackId: input.feedbackId,
-        AuthorId: input.authorId,
+        feedbackid: input.feedbackId,
+        authorid: input.authorId,
         Body: input.body,
         CreatedAt: nowIso(),
       },
