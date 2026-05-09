@@ -5,13 +5,18 @@ export function LanguageToggle() {
   const [showMessage, setShowMessage] = useState(false);
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-2">
       <button
         type="button"
-        className="text-lg opacity-100 cursor-default"
+        className="opacity-100 cursor-default"
         title="Français (actif)"
       >
-        🇫🇷
+        <img
+          src="https://flagcdn.com/w20/fr.png"
+          width="20"
+          height="15"
+          alt="Français"
+        />
       </button>
       <button
         type="button"
@@ -19,13 +24,18 @@ export function LanguageToggle() {
           setShowMessage(true);
           setTimeout(() => setShowMessage(false), 3000);
         }}
-        className="text-lg opacity-50 hover:opacity-100 transition-opacity"
+        className="opacity-50 hover:opacity-100 transition-opacity"
         title="English (coming soon)"
       >
-        🇬🇧
+        <img
+          src="https://flagcdn.com/w20/gb.png"
+          width="20"
+          height="15"
+          alt="English"
+        />
       </button>
       {showMessage && (
-        <span className="text-xs text-text-tertiary ml-1">
+        <span className="text-xs text-text-tertiary">
           Bientôt disponible
         </span>
       )}
